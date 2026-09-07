@@ -17,6 +17,8 @@ cd "$ROOT/docker"
 docker compose exec -T db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres \
   -v email="$EMAIL" -v senha="$SENHA" <<'SQL'
 create extension if not exists pgcrypto with schema extensions;
+select set_config('myapp.email', :'email', false);
+select set_config('myapp.senha', :'senha', false);
 
 do $$
 declare
