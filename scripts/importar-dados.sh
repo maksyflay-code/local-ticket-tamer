@@ -52,12 +52,6 @@ for arquivo in "${ARQUIVOS[@]}"; do
 
   # session_replication_role = replica desliga as checagens de ligação entre
   # tabelas durante a carga, permitindo importar em qualquer ordem.
-  if "${COMPOSE[@]}" exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
-      psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres <<SQL < /dev/null 2>/dev/null
-SELECT 1;
-SQL
-  then :; fi
-
   {
     echo "set session_replication_role = replica;"
     echo "\\copy public.$tabela ($colunas) from stdin with (format csv, header true)"
