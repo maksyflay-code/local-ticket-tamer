@@ -19,7 +19,7 @@ export default defineConfig({
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
   ssr: {
-    noExternal: ["h3-v2"],
+    noExternal: ["h3-v2", "rou3", "seroval", "srvx"],
   },
   plugins: [
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
