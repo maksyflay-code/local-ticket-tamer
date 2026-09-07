@@ -38,7 +38,7 @@ function adminError(error: { message?: string }) {
 type AdminContext = {
   userId: string;
   supabase?: {
-    rpc: (fn: "has_role", args: { _user_id: string; _role: "admin" }) => Promise<{ data: unknown; error: unknown }>;
+    rpc: (fn: any, args?: any) => any;
   };
 };
 
