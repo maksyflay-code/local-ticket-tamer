@@ -162,6 +162,7 @@ docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
 
 echo "==> Aplicando as migrações do sistema"
 bash "$ROOT/scripts/apply-migrations.sh"
+bash "$ROOT/scripts/corrigir-contas.sh"
 
 echo "==> Compilando e subindo a aplicação"
 docker compose up -d --build app gateway
