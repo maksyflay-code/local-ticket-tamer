@@ -35,9 +35,26 @@ function adminError(error: { message?: string }) {
   return new Error(error.message ?? "Erro administrativo inesperado.");
 }
 
-export async function assertAdmin(userId: string) {
+type AdminContext = {
+  userId: string;
+  supabase?: {
+    rpc: (fn: any, args?: any) => any;
+  };
+};
+
+export async function assertAdmin(context: string | AdminContext) {
+  const userId = typeof context === "string" ? context : context.userId;
+  const userClient = typeof context === "string" ? undefined : context.supabase;
+
   ensureAdminConfig();
 
+  // Verificação primária: mesma checagem usada pela interface (funciona com RLS).
+  if (userClient) {
+    const { data, error } = await userClient.rpc("has_role", { _user_id: userId, _role: "admin" });
+    if (!error && data === true) return;
+  }
+
+  // Fallback: leitura privilegiada direta.
   const { data, error } = await supabaseAdmin
     .from("user_roles")
     .select("role")
