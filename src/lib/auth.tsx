@@ -46,18 +46,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRole(null);
       return;
     }
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    if (!data || data.length === 0) {
-      setRole(null);
-      return;
+    const roles = (Object.keys(RANK) as AppRole[]).sort((a, b) => RANK[b] - RANK[a]);
+    for (const candidate of roles) {
+      const { data, error } = await supabase.rpc("has_role", {
+        _user_id: userId,
+        _role: candidate,
+      });
+      if (!error && data) {
+        setRole(candidate);
+        return;
+      }
     }
-    const top = data
-      .map((r) => r.role as AppRole)
-      .sort((a, b) => RANK[b] - RANK[a])[0];
-    setRole(top);
+    setRole(null);
   };
 
   useEffect(() => {
