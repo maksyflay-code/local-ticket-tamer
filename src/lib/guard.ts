@@ -13,10 +13,9 @@ export async function requireAdmin() {
   if (typeof window === "undefined") return;
   const { data } = await supabase.auth.getSession();
   if (!data.session) throw redirect({ to: "/login" });
-  const { data: roles } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", data.session.user.id)
-    .eq("role", "admin");
-  if (!roles || roles.length === 0) throw redirect({ to: "/dashboard" });
+  const { data: isAdmin, error } = await supabase.rpc("has_role", {
+    _user_id: data.session.user.id,
+    _role: "admin",
+  });
+  if (error || !isAdmin) throw redirect({ to: "/dashboard" });
 }
