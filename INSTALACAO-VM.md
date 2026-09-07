@@ -24,7 +24,8 @@ O instalador pergunta o endereço de acesso (por exemplo `http://192.168.0.10:80
 gera as senhas e chaves automaticamente, sobe o banco local, aplica toda a estrutura
 de tabelas e por fim publica o sistema.
 
-Ao terminar, acesse o endereço informado.
+Ao terminar, acesse o endereço informado. O login e a aplicação usam a mesma
+porta; não é necessário liberar a porta 8000 no firewall da VM.
 
 ## Primeiro usuário (administrador)
 
@@ -52,7 +53,7 @@ docker compose down               # parar tudo (os dados são preservados)
 ```bash
 git pull
 bash scripts/apply-migrations.sh
-cd docker && docker compose up -d --build app
+cd docker && docker compose up -d --build app gateway
 ```
 
 ## Backup do banco
