@@ -68,6 +68,9 @@ if [ "$DB_READY" != true ]; then
 fi
 
 echo "==> Conferindo contas internas do banco"
+# Evita que o serviço tente migrar o schema auth ao mesmo tempo em que o
+# instalador corrige permissões deixadas por uma tentativa anterior.
+docker compose stop auth >/dev/null 2>&1 || true
 if docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
   psql --no-password --host 127.0.0.1 --username supabase_admin \
   --dbname "$POSTGRES_DB" -tAc 'select 1' >/dev/null 2>&1; then
@@ -96,6 +99,16 @@ else
 
   restore_hba
   trap - EXIT
+fi
+
+echo "==> Conferindo propriedade das funções de autenticação"
+AUTH_FUNCTION_OWNERS="$(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
+  psql --no-password --host 127.0.0.1 --username supabase_admin \
+  --dbname "$POSTGRES_DB" -tAc \
+  "select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_roles r on r.oid=p.proowner where n.nspname='auth' and p.proname in ('uid','role','email','jwt') and p.pronargs=0 and r.rolname <> 'supabase_auth_admin'")"
+if [ "$AUTH_FUNCTION_OWNERS" != "0" ]; then
+  echo "ERRO: não foi possível transferir as funções auth.* para o serviço de usuários."
+  exit 1
 fi
 
 echo "==> Subindo os demais serviços locais"

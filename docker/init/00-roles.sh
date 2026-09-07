@@ -93,17 +93,20 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon, authenticated, service_role;
 
--- Corrige funções deixadas por versões anteriores. O serviço de autenticação
--- criará e atualizará auth.uid()/auth.role() ao iniciar.
-DO $$
-DECLARE function_name text;
-BEGIN
-  FOREACH function_name IN ARRAY ARRAY['uid','role','email','jwt'] LOOP
-    IF to_regprocedure(format('auth.%I()', function_name)) IS NOT NULL THEN
-      EXECUTE format('ALTER FUNCTION auth.%I() OWNER TO supabase_auth_admin', function_name);
-    END IF;
-  END LOOP;
-END $$;
+-- Corrige funções deixadas por versões anteriores. Gerar os ALTERs com
+-- \gexec evita qualquer ambiguidade de assinatura e cobre somente funções
+-- sem argumentos, que são as mantidas pelo serviço de autenticação.
+SELECT format(
+  'ALTER FUNCTION %I.%I() OWNER TO supabase_auth_admin',
+  n.nspname,
+  p.proname
+)
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'auth'
+  AND p.proname IN ('uid', 'role', 'email', 'jwt')
+  AND p.pronargs = 0
+\gexec
 
 GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
 SQL
