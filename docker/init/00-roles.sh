@@ -2,9 +2,19 @@
 # Cria as roles e schemas internos do Supabase self-hosted e define suas senhas.
 # Executado apenas na primeira inicializacao do banco.
 set -e
-export PGPASSWORD="$POSTGRES_PASSWORD"
 
-psql -v ON_ERROR_STOP=1 --host 127.0.0.1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
+PSQL_CONNECTION=(--host 127.0.0.1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB")
+if [ "${REPAIR_EXISTING_DB:-false}" = "true" ]; then
+  # Em volumes existentes, a senha gravada no PostgreSQL pode ser diferente
+  # da senha atual do .env. O usuário local postgres entra por autenticação
+  # peer e consegue sincronizá-la sem solicitar senha no terminal.
+  unset PGPASSWORD
+  PSQL_CONNECTION=(--username postgres --dbname "$POSTGRES_DB")
+else
+  export PGPASSWORD="$POSTGRES_PASSWORD"
+fi
+
+psql -v ON_ERROR_STOP=1 "${PSQL_CONNECTION[@]}" \
   -v pgpass="$POSTGRES_PASSWORD" <<'SQL'
 -- ---------- roles sem login ----------
 DO $$
