@@ -41,20 +41,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
 
-  const loadRole = async (userId: string | undefined) => {
-    if (!userId) {
+  const loadRole = async (activeSession: Session | null) => {
+    const userId = activeSession?.user?.id;
+    if (!userId || !activeSession.access_token) {
       setRole(null);
       return;
     }
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+    if (!supabaseUrl || !publishableKey) {
+      setRole(null);
+      return;
+    }
+
     const roles = (Object.keys(RANK) as AppRole[]).sort((a, b) => RANK[b] - RANK[a]);
     for (const candidate of roles) {
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: userId,
-        _role: candidate,
-      });
-      if (!error && data) {
-        setRole(candidate);
-        return;
+      try {
+        // Envia explicitamente o JWT da sessão. Isso evita que a consulta de
+        // permissão seja executada como `anon` durante a hidratação inicial.
+        const response = await fetch(`${supabaseUrl}/rest/v1/rpc/has_role`, {
+          method: "POST",
+          headers: {
+            apikey: publishableKey,
+            Authorization: `Bearer ${activeSession.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ _user_id: userId, _role: candidate }),
+        });
+        if (response.ok && (await response.json()) === true) {
+          setRole(candidate);
+          return;
+        }
+      } catch {
+        // Tenta a próxima função; a ausência de papel é tratada abaixo.
       }
     }
     setRole(null);
@@ -75,12 +95,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
       // defer to avoid deadlock
-      setTimeout(() => loadRole(s?.user?.id), 0);
+      setTimeout(() => loadRole(s), 0);
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
-      loadRole(data.session?.user?.id);
+      loadRole(data.session);
       if (typeof window !== "undefined" && data.session) {
         const existing = localStorage.getItem(SESSION_START_KEY);
         if (!existing) {
@@ -133,7 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signOut: async () => {
           await supabase.auth.signOut();
         },
-        refreshRole: async () => loadRole(session?.user?.id),
+        refreshRole: async () => loadRole(session),
         sessionExpiresAt,
         extendSession,
       }}
