@@ -23,8 +23,6 @@ if [ "$NEEDS_CONFIG" = true ]; then
 
   read -rp "Endereço de acesso ao sistema (ex: http://192.168.0.10:8080): " SITE
   SITE="${SITE:-http://localhost:8080}"
-  HOSTPART="$(echo "$SITE" | sed -E 's#(https?://[^:/]+).*#\1#')"
-
   if command -v node >/dev/null; then
     KEYS="$(node "$ROOT/scripts/gen-keys.mjs")"
   else
@@ -36,7 +34,7 @@ if [ "$NEEDS_CONFIG" = true ]; then
 
   set_env() { sed -i "s|^$1=.*|$1=$2|" "$ENV_FILE"; }
   set_env SITE_URL "$SITE"
-  set_env SUPABASE_PUBLIC_URL "$HOSTPART:8000"
+  set_env SUPABASE_PUBLIC_URL "$SITE"
   set_env POSTGRES_PASSWORD "$PGPASS"
   while IFS= read -r line; do set_env "${line%%=*}" "${line#*=}"; done <<< "$KEYS"
 
@@ -49,6 +47,11 @@ cd "$ROOT/docker"
 # existia e ainda guarda variáveis antigas em seu ambiente.
 # shellcheck disable=SC1090
 source "$ENV_FILE"
+
+# Versões antigas expunham a API na porta 8000. Agora navegador, login e
+# aplicação usam o mesmo endereço público; a API permanece na rede Docker.
+sed -i "s|^SUPABASE_PUBLIC_URL=.*|SUPABASE_PUBLIC_URL=$SITE_URL|" "$ENV_FILE"
+SUPABASE_PUBLIC_URL="$SITE_URL"
 
 echo "==> Subindo banco de dados local"
 docker compose up -d db
@@ -161,7 +164,7 @@ echo "==> Aplicando as migrações do sistema"
 bash "$ROOT/scripts/apply-migrations.sh"
 
 echo "==> Compilando e subindo a aplicação"
-docker compose up -d --build app
+docker compose up -d --build app gateway
 
 echo
 echo "Pronto! Sistema disponível em: $SITE_URL"
