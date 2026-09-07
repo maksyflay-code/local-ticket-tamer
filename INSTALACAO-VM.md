@@ -26,16 +26,16 @@ de tabelas e por fim publica o sistema.
 
 Ao terminar, acesse o endereço informado.
 
-## Primeiro usuário
+## Primeiro usuário (administrador)
 
-Crie a conta pela tela de login (cadastro por e-mail e senha, sem confirmação por e-mail)
-e depois marque-a como administrador:
+Crie o administrador direto pelo terminal da VM:
 
 ```bash
-cd docker
-docker compose exec -T db psql -U supabase_admin -d postgres \
-  -c "insert into public.user_roles (user_id, role) select id, 'admin' from auth.users order by created_at limit 1 on conflict do nothing;"
+sudo bash scripts/criar-admin.sh maksyflay@ivitelecom.com.br "SuaSenhaForte123"
 ```
+
+O mesmo comando também serve para trocar a senha de um usuário existente.
+
 
 ## Comandos do dia a dia
 
