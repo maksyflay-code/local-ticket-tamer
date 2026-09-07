@@ -32,6 +32,7 @@ END $$;
 -- Geramos os comandos como linhas SQL e usamos \gexec para aplicar a senha.
 SELECT format('CREATE ROLE %I LOGIN NOINHERIT PASSWORD %L', role_name, :'pgpass')
 FROM unnest(ARRAY[
+  'postgres',
   'authenticator','pgbouncer','supabase_auth_admin','supabase_functions_admin',
   'supabase_storage_admin','supabase_read_only_user','supabase_replication_admin',
   'supabase_realtime_admin','dashboard_user'
@@ -41,11 +42,16 @@ WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name)
 
 SELECT format('ALTER ROLE %I WITH LOGIN PASSWORD %L', role_name, :'pgpass')
 FROM unnest(ARRAY[
+  'postgres',
   'authenticator','pgbouncer','supabase_auth_admin','supabase_functions_admin',
   'supabase_storage_admin','supabase_read_only_user','supabase_replication_admin',
   'supabase_realtime_admin','dashboard_user'
 ]) AS roles(role_name)
 \gexec
+
+ALTER ROLE postgres WITH CREATEROLE CREATEDB REPLICATION BYPASSRLS;
+GRANT anon, authenticated, service_role TO postgres;
+
 
 SELECT format('ALTER ROLE supabase_admin WITH LOGIN PASSWORD %L', :'pgpass')
 \gexec
