@@ -63,7 +63,7 @@ if [ "$DB_READY" != true ]; then
 fi
 
 echo "==> Conferindo contas internas do banco"
-docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db bash /docker-entrypoint-initdb.d/00-roles.sh
+docker compose exec -T db bash /docker-entrypoint-initdb.d/00-roles.sh
 
 echo "==> Subindo os demais serviços locais"
 docker compose up -d auth rest realtime storage meta kong
