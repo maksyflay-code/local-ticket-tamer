@@ -10,6 +10,11 @@ set -a; . ./.env; set +a
 
 PSQL=(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres)
 
+# Garante que funcoes como crypt()/gen_salt() fiquem visiveis nas migracoes
+"${PSQL[@]}" -c "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;" >/dev/null
+"${PSQL[@]}" -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" WITH SCHEMA extensions;" >/dev/null
+"${PSQL[@]}" -c "ALTER DATABASE postgres SET search_path TO public, extensions;" >/dev/null
+
 "${PSQL[@]}" -c "CREATE TABLE IF NOT EXISTS public._migracoes_aplicadas (nome text primary key, aplicada_em timestamptz default now());" >/dev/null
 
 for f in "$ROOT"/supabase/migrations/*.sql; do
