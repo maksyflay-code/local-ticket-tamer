@@ -17,6 +17,9 @@ cd "$ROOT/docker"
 # Carrega as chaves geradas na instalação.
 set -a; . ./.env; set +a
 
+# Evita contas com campos internos em NULL antes de qualquer operação.
+bash "$ROOT/scripts/corrigir-contas.sh" >/dev/null
+
 AUTH_ADMIN_URL="http://127.0.0.1:${APP_PORT:-8080}/auth/v1/admin/users"
 USER_ID="$(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
   psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres -At \
