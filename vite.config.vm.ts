@@ -18,6 +18,9 @@ export default defineConfig({
     __BUILD_ID__: JSON.stringify(process.env.COMMIT_SHA ?? "vm"),
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
+  ssr: {
+    noExternal: ["h3-v2"],
+  },
   plugins: [
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
