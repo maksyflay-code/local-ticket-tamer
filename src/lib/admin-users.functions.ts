@@ -16,7 +16,7 @@ const RoleSchema = z.enum(["admin", "operador", "visualizador"]);
 export const adminListUsers = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context.userId);
+    await assertAdmin(context);
     return listAdminUsers();
   });
 
@@ -33,7 +33,7 @@ export const adminCreateUser = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
+    await assertAdmin(context);
     return createAdminUser(data);
   });
 
@@ -43,7 +43,7 @@ export const adminSetUserRole = createServerFn({ method: "POST" })
     z.object({ userId: z.string().uuid(), role: RoleSchema }).parse(input),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
+    await assertAdmin(context);
     return setAdminUserRole(data);
   });
 
@@ -51,7 +51,7 @@ export const adminDeleteUser = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => z.object({ userId: z.string().uuid() }).parse(input))
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
+    await assertAdmin(context);
     if (data.userId === context.userId) throw new Error("Você não pode excluir sua própria conta.");
     return deleteAdminUser(data.userId);
   });
@@ -64,7 +64,7 @@ export const adminResetPassword = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
+    await assertAdmin(context);
     return resetAdminUserPassword(data);
   });
 
@@ -76,6 +76,6 @@ export const adminSetUserName = createServerFn({ method: "POST" })
       .parse(input),
   )
   .handler(async ({ data, context }) => {
-    await assertAdmin(context.userId);
+    await assertAdmin(context);
     return setAdminUserName(data);
   });
