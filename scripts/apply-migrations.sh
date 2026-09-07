@@ -10,6 +10,12 @@ set -a; . ./.env; set +a
 
 PSQL=(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres)
 
+# Atualiza as funções que extraem a identidade da sessão. O PostgREST atual
+# envia os dados em request.jwt.claims; versões antigas usavam campos separados.
+docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
+  psql -v ON_ERROR_STOP=1 -U supabase_auth_admin -d postgres \
+  < "$ROOT/docker/init/01-auth-functions.sql" >/dev/null
+
 # Garante que funcoes como crypt()/gen_salt() fiquem visiveis nas migracoes
 "${PSQL[@]}" -c "CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;" >/dev/null
 "${PSQL[@]}" -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" WITH SCHEMA extensions;" >/dev/null
