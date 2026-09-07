@@ -100,7 +100,30 @@ fi
 
 echo "==> Subindo os demais serviços locais"
 docker compose up -d auth rest realtime storage meta kong
-sleep 10  # tempo para auth/storage criarem seus schemas
+
+echo "==> Aguardando o serviço de usuários preparar o banco"
+AUTH_READY=false
+for i in $(seq 1 60); do
+  if docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
+    psql --no-password --host 127.0.0.1 --username supabase_admin \
+    --dbname "$POSTGRES_DB" -tAc "select to_regclass('auth.users') is not null" \
+    | grep -qx 't'; then
+    AUTH_READY=true
+    break
+  fi
+
+  if ! docker compose ps --status running --services | grep -qx 'auth'; then
+    echo "ERRO: o serviço de usuários parou antes de preparar o banco."
+    echo "Execute: docker logs ivi-auth --tail 100"
+    exit 1
+  fi
+  sleep 2
+done
+if [ "$AUTH_READY" != true ]; then
+  echo "ERRO: a tabela auth.users não foi criada no tempo esperado."
+  echo "Execute: docker logs ivi-auth --tail 100"
+  exit 1
+fi
 
 echo "==> Aplicando as migrações do sistema"
 bash "$ROOT/scripts/apply-migrations.sh"
