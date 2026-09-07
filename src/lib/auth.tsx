@@ -53,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const sessionRole = getSessionRole(activeSession);
     if (!userId || !activeSession.access_token) {
       if (requestId === roleRequestId.current) setRole(null);
+      console.info("[Auth] Permissão não consultada: sessão ausente");
       return;
     }
 
@@ -83,18 +84,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             body: JSON.stringify({ _user_id: userId, _role: candidate }),
           });
           if (response.ok && (await response.json()) === true) {
-            if (requestId === roleRequestId.current) setRole(candidate);
+            if (requestId === roleRequestId.current) {
+              setRole(candidate);
+              console.info(`[Auth] Permissão confirmada: ${candidate}`);
+            }
             return;
           }
-        } catch {
+        } catch (error) {
           // A instalação local pode ainda estar iniciando; tenta novamente.
+          console.warn("[Auth] Falha temporária ao consultar permissão", error);
         }
       }
       if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
     }
     // Uma falha temporária na API não deve apagar uma permissão válida que já
     // veio assinada na sessão.
-    if (requestId === roleRequestId.current && !sessionRole) setRole(null);
+    if (requestId === roleRequestId.current && !sessionRole) {
+      setRole(null);
+      console.error("[Auth] Nenhuma permissão encontrada para a sessão atual");
+    }
   };
 
   useEffect(() => {
@@ -118,6 +126,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
+      // onAuthStateChange nem sempre repete INITIAL_SESSION quando o cliente
+      // já restaurou a sessão antes de o React registrar o observador.
+      // Este caminho garante a leitura da permissão em toda atualização.
+      void loadRole(data.session);
       if (typeof window !== "undefined" && data.session) {
         const existing = localStorage.getItem(SESSION_START_KEY);
         if (!existing) {
