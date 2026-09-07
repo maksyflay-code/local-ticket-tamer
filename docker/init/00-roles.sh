@@ -50,6 +50,10 @@ FROM unnest(ARRAY[
 \gexec
 
 ALTER ROLE postgres WITH CREATEROLE CREATEDB REPLICATION BYPASSRLS;
+-- A conta administrativa da API precisa ignorar as regras de acesso por linha,
+-- igual ao Supabase gerenciado. Sem isto, criar/alterar permissões falha.
+ALTER ROLE service_role WITH BYPASSRLS;
+ALTER ROLE supabase_admin WITH BYPASSRLS;
 GRANT anon, authenticated, service_role TO postgres;
 
 

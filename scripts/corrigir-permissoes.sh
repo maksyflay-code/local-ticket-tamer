@@ -12,6 +12,9 @@ PSQL=(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db psql -v ON_ER
 
 echo "Aplicando permissões..."
 "${PSQL[@]}" >/dev/null <<'SQL'
+ALTER ROLE service_role WITH BYPASSRLS;
+ALTER ROLE supabase_admin WITH BYPASSRLS;
+
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT USAGE ON SCHEMA extensions TO anon, authenticated, service_role;
 
