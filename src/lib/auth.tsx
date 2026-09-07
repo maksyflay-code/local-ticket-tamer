@@ -35,6 +35,11 @@ const RANK: Record<AppRole, number> = { admin: 3, operador: 2, visualizador: 1 }
 const MAX_SESSION_MS = 4 * 60 * 60 * 1000; // 4 hours
 const SESSION_START_KEY = "ivi.session.startedAt";
 
+function getSessionRole(activeSession: Session | null): AppRole | null {
+  const value = activeSession?.user?.app_metadata?.app_role;
+  return value === "admin" || value === "operador" || value === "visualizador" ? value : null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
@@ -45,15 +50,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const loadRole = async (activeSession: Session | null) => {
     const requestId = ++roleRequestId.current;
     const userId = activeSession?.user?.id;
+    const sessionRole = getSessionRole(activeSession);
     if (!userId || !activeSession.access_token) {
       if (requestId === roleRequestId.current) setRole(null);
       return;
     }
 
+    // app_metadata faz parte do token assinado e não pode ser alterado pelo
+    // usuário. Exibe a permissão imediatamente, enquanto o banco a confirma.
+    if (sessionRole && requestId === roleRequestId.current) setRole(sessionRole);
+
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     if (!supabaseUrl || !publishableKey) {
-      if (requestId === roleRequestId.current) setRole(null);
+      if (requestId === roleRequestId.current && !sessionRole) setRole(null);
       return;
     }
 
@@ -82,7 +92,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
     }
-    if (requestId === roleRequestId.current) setRole(null);
+    // Uma falha temporária na API não deve apagar uma permissão válida que já
+    // veio assinada na sessão.
+    if (requestId === roleRequestId.current && !sessionRole) setRole(null);
   };
 
   useEffect(() => {
