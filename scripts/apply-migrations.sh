@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS realtime.messages (
   inserted_at timestamptz NOT NULL DEFAULT now(),
   id bigserial
 );
+GRANT USAGE ON SCHEMA realtime TO authenticated;
 GRANT SELECT ON realtime.messages TO authenticated;
 SQL
 
