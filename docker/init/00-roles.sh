@@ -122,7 +122,7 @@ LANGUAGE sql STABLE AS $$
   )::jsonb
 $$;
 
-GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role, postgres;
+GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
 GRANT EXECUTE ON FUNCTION auth.uid(), auth.role(), auth.email(), auth.jwt()
   TO anon, authenticated, service_role;
 SQL
