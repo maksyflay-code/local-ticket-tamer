@@ -4,18 +4,21 @@ DROP POLICY IF EXISTS "auth read chamado anexos" ON storage.objects;
 DROP POLICY IF EXISTS "auth upload chamado anexos" ON storage.objects;
 DROP POLICY IF EXISTS "auth delete chamado anexos" ON storage.objects;
 
+DROP POLICY IF EXISTS "read chamado anexos by role" ON storage.objects;
 CREATE POLICY "read chamado anexos by role"
 ON storage.objects
 FOR SELECT
 TO authenticated
 USING (bucket_id = 'chamado-anexos' AND public.can_read(auth.uid()));
 
+DROP POLICY IF EXISTS "upload chamado anexos by role" ON storage.objects;
 CREATE POLICY "upload chamado anexos by role"
 ON storage.objects
 FOR INSERT
 TO authenticated
 WITH CHECK (bucket_id = 'chamado-anexos' AND public.can_write(auth.uid()));
 
+DROP POLICY IF EXISTS "delete chamado anexos by admin" ON storage.objects;
 CREATE POLICY "delete chamado anexos by admin"
 ON storage.objects
 FOR DELETE
@@ -23,6 +26,7 @@ TO authenticated
 USING (bucket_id = 'chamado-anexos' AND public.is_admin(auth.uid()));
 
 -- 2) Restrict Realtime subscriptions to users with an assigned role
+DROP POLICY IF EXISTS "realtime subscribe by role" ON realtime.messages;
 CREATE POLICY "realtime subscribe by role"
 ON realtime.messages
 FOR SELECT
