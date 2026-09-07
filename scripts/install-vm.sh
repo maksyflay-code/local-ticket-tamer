@@ -17,8 +17,12 @@ if [ ! -f "$ENV_FILE" ]; then
   SITE="${SITE:-http://localhost:8080}"
   HOSTPART="$(echo "$SITE" | sed -E 's#(https?://[^:/]+).*#\1#')"
 
-  KEYS="$(docker run --rm node:22-alpine node -e "$(sed 's/"/\\"/g' /dev/null)" 2>/dev/null || true)"
-  KEYS="$(node "$ROOT/scripts/gen-keys.mjs" 2>/dev/null || docker run --rm -v "$ROOT/scripts:/s" node:22-alpine node /s/gen-keys.mjs)"
+  if command -v node >/dev/null; then
+    KEYS="$(node "$ROOT/scripts/gen-keys.mjs")"
+  else
+    KEYS="$(docker run --rm -v "$ROOT/scripts:/s:ro" node:22-alpine node /s/gen-keys.mjs)"
+  fi
+
 
   PGPASS="$(openssl rand -hex 16)"
 
