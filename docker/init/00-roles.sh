@@ -3,7 +3,7 @@
 # Executado apenas na primeira inicializacao do banco.
 set -e
 
-PSQL_CONNECTION=(--host 127.0.0.1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB")
+PSQL_CONNECTION=(--no-password --host 127.0.0.1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB")
 if [ "${REPAIR_EXISTING_DB:-false}" = "true" ]; then
   # Instalações antigas iniciavam o volume com esta senha provisória.
   # Tente primeiro a senha atual e depois a provisória, sem interação.

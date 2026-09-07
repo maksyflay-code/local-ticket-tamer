@@ -45,6 +45,11 @@ fi
 
 cd "$ROOT/docker"
 
+# Usa sempre os valores atuais do arquivo, inclusive quando o contêiner já
+# existia e ainda guarda variáveis antigas em seu ambiente.
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+
 echo "==> Subindo banco de dados local"
 docker compose up -d db
 
@@ -63,8 +68,35 @@ if [ "$DB_READY" != true ]; then
 fi
 
 echo "==> Conferindo contas internas do banco"
-docker compose exec -T -e REPAIR_EXISTING_DB=true \
-  db bash /docker-entrypoint-initdb.d/00-roles.sh
+if docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
+  psql --no-password --host 127.0.0.1 --username supabase_admin \
+  --dbname "$POSTGRES_DB" -tAc 'select 1' >/dev/null 2>&1; then
+  docker compose exec -T \
+    -e REPAIR_EXISTING_DB=true \
+    -e POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+    db bash /docker-entrypoint-initdb.d/00-roles.sh
+else
+  echo "==> Recuperando senha de uma instalação anterior"
+  HBA_BACKUP="/tmp/pg_hba.conf.install-vm-backup"
+  restore_hba() {
+    docker compose exec -T -u root db sh -c \
+      "test ! -f '$HBA_BACKUP' || { cp '$HBA_BACKUP' /etc/postgresql/pg_hba.conf; rm -f '$HBA_BACKUP'; kill -HUP 1; }" \
+      >/dev/null 2>&1 || true
+  }
+  trap restore_hba EXIT
+
+  docker compose exec -T -u root db sh -c \
+    "cp /etc/postgresql/pg_hba.conf '$HBA_BACKUP' && sed -i '1i host all all 127.0.0.1/32 trust' /etc/postgresql/pg_hba.conf && kill -HUP 1"
+
+  docker compose exec -T \
+    -e REPAIR_EXISTING_DB=true \
+    -e POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+    -e PGPASSWORD= \
+    db bash /docker-entrypoint-initdb.d/00-roles.sh
+
+  restore_hba
+  trap - EXIT
+fi
 
 echo "==> Subindo os demais serviços locais"
 docker compose up -d auth rest realtime storage meta kong
@@ -76,8 +108,6 @@ bash "$ROOT/scripts/apply-migrations.sh"
 echo "==> Compilando e subindo a aplicação"
 docker compose up -d --build app
 
-# shellcheck disable=SC1090
-source "$ENV_FILE"
 echo
 echo "Pronto! Sistema disponível em: $SITE_URL"
 echo "Banco de dados local (PostgreSQL) na porta $POSTGRES_PORT_EXPOSED desta VM."
