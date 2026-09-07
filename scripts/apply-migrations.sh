@@ -72,6 +72,12 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO authenticated, service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon, authenticated, service_role;
+NOTIFY pgrst, 'reload schema';
 SQL
 
 echo "Permissões da API de dados aplicadas."
+
+# O PostgREST pode ter iniciado antes das tabelas e funções das migrações.
+# Reiniciar força a releitura completa do schema também em instalações antigas.
+docker compose restart rest >/dev/null
+echo "Serviço de dados atualizado."
