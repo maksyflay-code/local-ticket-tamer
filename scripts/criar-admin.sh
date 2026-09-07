@@ -42,12 +42,18 @@ begin
       '00000000-0000-0000-0000-000000000000', v_id, 'authenticated', 'authenticated',
       v_email, extensions.crypt(v_senha, extensions.gen_salt('bf')),
       now(), now(), now(),
-      '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb
+      '{"provider":"email","providers":["email"],"app_role":"admin"}'::jsonb, '{}'::jsonb
     );
   else
     update auth.users
        set encrypted_password = extensions.crypt(v_senha, extensions.gen_salt('bf')),
            email_confirmed_at = coalesce(email_confirmed_at, now()),
+           raw_app_meta_data = jsonb_set(
+             coalesce(raw_app_meta_data, '{}'::jsonb),
+             '{app_role}',
+             '"admin"'::jsonb,
+             true
+           ),
            updated_at = now()
      where id = v_id;
   end if;
