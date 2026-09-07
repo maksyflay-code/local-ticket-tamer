@@ -15,6 +15,17 @@ PSQL=(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db psql -v ON_ER
 "${PSQL[@]}" -c "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\" WITH SCHEMA extensions;" >/dev/null
 "${PSQL[@]}" -c "ALTER DATABASE postgres SET search_path TO public, extensions;" >/dev/null
 
+# Garante a publicação usada pelo serviço de tempo real (algumas migrações alteram essa publicação)
+"${PSQL[@]}" >/dev/null <<'SQL'
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+    CREATE PUBLICATION supabase_realtime;
+  END IF;
+END
+$$;
+SQL
+
 "${PSQL[@]}" -c "CREATE TABLE IF NOT EXISTS public._migracoes_aplicadas (nome text primary key, aplicada_em timestamptz default now());" >/dev/null
 
 for f in "$ROOT"/supabase/migrations/*.sql; do
