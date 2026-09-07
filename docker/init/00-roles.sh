@@ -2,8 +2,9 @@
 # Cria as roles e schemas internos do Supabase self-hosted e define suas senhas.
 # Executado apenas na primeira inicializacao do banco.
 set -e
+export PGPASSWORD="$POSTGRES_PASSWORD"
 
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
+psql -v ON_ERROR_STOP=1 --host 127.0.0.1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" \
   -v pgpass="$POSTGRES_PASSWORD" <<'SQL'
 -- ---------- roles sem login ----------
 DO $$
