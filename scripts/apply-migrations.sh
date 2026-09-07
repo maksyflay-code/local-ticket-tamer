@@ -28,6 +28,24 @@ SQL
 
 "${PSQL[@]}" -c "CREATE TABLE IF NOT EXISTS public._migracoes_aplicadas (nome text primary key, aplicada_em timestamptz default now());" >/dev/null
 
+# Garante a tabela usada pelo serviço de tempo real (algumas migrações criam políticas nela)
+"${PSQL[@]}" >/dev/null <<'SQL'
+CREATE SCHEMA IF NOT EXISTS realtime;
+CREATE TABLE IF NOT EXISTS realtime.messages (
+  uuid uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  topic text NOT NULL,
+  extension text NOT NULL,
+  payload jsonb,
+  event text,
+  private boolean DEFAULT false,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  inserted_at timestamptz NOT NULL DEFAULT now(),
+  id bigserial
+);
+GRANT USAGE ON SCHEMA realtime TO authenticated;
+GRANT SELECT ON realtime.messages TO authenticated;
+SQL
+
 for f in "$ROOT"/supabase/migrations/*.sql; do
   name="$(basename "$f")"
   applied="$("${PSQL[@]}" -tAc "SELECT 1 FROM public._migracoes_aplicadas WHERE nome = '$name'")"
