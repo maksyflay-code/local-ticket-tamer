@@ -1,0 +1,3 @@
+CREATE POLICY "chamado-anexos update" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'chamado-anexos' AND public.can_write(auth.uid())) WITH CHECK (bucket_id = 'chamado-anexos' AND public.can_write(auth.uid()));
+
+CREATE POLICY "documentos-gerados update" ON storage.objects FOR UPDATE TO authenticated USING (bucket_id = 'documentos-gerados' AND public.can_write(auth.uid())) WITH CHECK (bucket_id = 'documentos-gerados' AND public.can_write(auth.uid()));

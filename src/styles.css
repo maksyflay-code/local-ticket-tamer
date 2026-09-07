@@ -62,39 +62,50 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
+  --radius: 0.875rem;
+  /* Midnight Indigo theme */
+  --background: oklch(0.14 0.03 275);
+  --foreground: oklch(0.97 0.01 260);
+  --card: oklch(0.19 0.04 275);
+  --card-foreground: oklch(0.97 0.01 260);
+  --popover: oklch(0.19 0.04 275);
+  --popover-foreground: oklch(0.97 0.01 260);
+  --primary: oklch(0.62 0.22 275);
+  --primary-foreground: oklch(0.98 0.005 260);
+  --secondary: oklch(0.26 0.05 275);
+  --secondary-foreground: oklch(0.97 0.01 260);
+  --muted: oklch(0.24 0.035 275);
+  --muted-foreground: oklch(0.72 0.03 270);
+  --accent: oklch(0.30 0.10 275);
+  --accent-foreground: oklch(0.97 0.01 260);
+  --destructive: oklch(0.65 0.22 25);
+  --destructive-foreground: oklch(0.97 0.01 240);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.62 0.22 275);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --sidebar: oklch(0.16 0.03 275);
+  --sidebar-foreground: oklch(0.97 0.01 260);
+  --sidebar-primary: oklch(0.62 0.22 275);
+  --sidebar-primary-foreground: oklch(0.98 0.005 260);
+  --sidebar-accent: oklch(0.30 0.10 275);
+  --sidebar-accent-foreground: oklch(0.97 0.01 260);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.62 0.22 275);
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-display: 'Inter Tight', 'Inter', sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
+  /* Effects */
+  --gradient-primary: linear-gradient(135deg, oklch(0.62 0.22 275), oklch(0.72 0.18 250));
+  --gradient-surface: linear-gradient(160deg, oklch(0.22 0.05 275 / 0.9), oklch(0.16 0.04 275 / 0.7));
+  --gradient-glow: radial-gradient(60% 60% at 50% 0%, oklch(0.62 0.22 275 / 0.25), transparent 70%);
+  --shadow-glow: 0 10px 40px -10px oklch(0.62 0.22 275 / 0.35);
+  --shadow-elegant: 0 20px 60px -20px oklch(0.10 0.04 275 / 0.6);
 }
 
 .dark {
@@ -140,5 +151,87 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: var(--font-body);
   }
+  .font-mono { font-family: var(--font-mono); }
+  .font-display { font-family: var(--font-display); letter-spacing: -0.02em; }
+}
+
+@layer utilities {
+  /* Bento card: soft gradient surface, subtle inner border, glass blur */
+  .bento {
+    position: relative;
+    border-radius: var(--radius-lg);
+    background: var(--gradient-surface);
+    border: 1px solid oklch(1 0 0 / 6%);
+    box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 4%), var(--shadow-elegant);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
+    transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+  }
+  .bento:hover {
+    border-color: oklch(0.62 0.22 275 / 0.45);
+    box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 6%), var(--shadow-glow);
+    transform: translateY(-2px);
+  }
+  .bento-glow::before {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    background: var(--gradient-glow);
+    opacity: .6;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .ambient-orbs {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .ambient-orbs::before,
+  .ambient-orbs::after {
+    content: "";
+    position: absolute;
+    width: 480px; height: 480px;
+    border-radius: 9999px;
+    filter: blur(90px);
+    opacity: .35;
+  }
+  .ambient-orbs::before {
+    top: -160px; left: -120px;
+    background: oklch(0.62 0.22 275 / 0.6);
+  }
+  .ambient-orbs::after {
+    top: -120px; right: -160px;
+    background: oklch(0.55 0.20 230 / 0.5);
+  }
+}
+
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; color: #0f172a !important; }
+  /* Hide app chrome */
+  aside, header, .no-print { display: none !important; }
+  main { display: block !important; }
+  main > div { padding: 0 !important; }
+  /* Force light, printable surfaces */
+  .bg-background, .bg-card\/40, .bg-card\/30, .bg-card\/60, .bg-sidebar { background: #fff !important; }
+  .text-foreground, .text-muted-foreground { color: #0f172a !important; }
+  .text-muted-foreground { color: #475569 !important; }
+  .border-border\/60, .border-border\/30, .border-border { border-color: #cbd5e1 !important; }
+  .backdrop-blur-sm, .backdrop-blur { backdrop-filter: none !important; }
+  /* Layout tweaks */
+  .print-area { width: 100% !important; }
+  .print-area .grid { display: grid !important; }
+  .print-area .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .print-area .lg\:grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)) !important; }
+  .print-area .lg\:col-span-2 { grid-column: span 2 / span 2 !important; }
+  .print-area .lg\:col-span-3 { grid-column: span 3 / span 3 !important; }
+  /* Avoid breaking charts/cards across pages */
+  .print-area .rounded-xl { break-inside: avoid; page-break-inside: avoid; box-shadow: none !important; }
+  /* Recharts: ensure SVG colors print */
+  svg { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
