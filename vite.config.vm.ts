@@ -19,7 +19,9 @@ export default defineConfig({
     __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
   },
   ssr: {
-    noExternal: ["h3-v2", "rou3", "seroval", "srvx"],
+    // A imagem final não leva node_modules. Empacote todas as dependências
+    // usadas pelo SSR para que o servidor seja realmente independente.
+    noExternal: true,
   },
   plugins: [
     tsConfigPaths({ projects: ["./tsconfig.json"] }),
