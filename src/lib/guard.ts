@@ -9,7 +9,6 @@ export async function requireAuth() {
   if (!data.session) throw redirect({ to: "/login" });
 }
 
-
 export async function requireAdmin() {
   if (typeof window === "undefined") return;
   const { data } = await supabase.auth.getSession();
