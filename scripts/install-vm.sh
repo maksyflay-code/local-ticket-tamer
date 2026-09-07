@@ -102,11 +102,24 @@ else
 fi
 
 echo "==> Conferindo propriedade das funções de autenticação"
-AUTH_FUNCTION_OWNERS="$(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
+docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
+  psql --no-password --host 127.0.0.1 --username supabase_admin \
+  --dbname "$POSTGRES_DB" -v ON_ERROR_STOP=1 <<'SQL'
+ALTER SCHEMA auth OWNER TO supabase_auth_admin;
+SELECT format('ALTER FUNCTION %I.%I() OWNER TO supabase_auth_admin', n.nspname, p.proname)
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'auth'
+  AND p.proname IN ('uid', 'role', 'email', 'jwt')
+  AND p.pronargs = 0
+\gexec
+SQL
+
+if ! docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
   psql --no-password --host 127.0.0.1 --username supabase_admin \
   --dbname "$POSTGRES_DB" -tAc \
-  "select count(*) from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_roles r on r.oid=p.proowner where n.nspname='auth' and p.proname in ('uid','role','email','jwt') and p.pronargs=0 and r.rolname <> 'supabase_auth_admin'")"
-if [ "$AUTH_FUNCTION_OWNERS" != "0" ]; then
+  "select count(*) = 0 from pg_proc p join pg_namespace n on n.oid=p.pronamespace join pg_roles r on r.oid=p.proowner where n.nspname='auth' and p.proname in ('uid','role') and p.pronargs=0 and r.rolname <> 'supabase_auth_admin'" \
+  | tr -d '[:space:]' | grep -qx 't'; then
   echo "ERRO: não foi possível transferir as funções auth.* para o serviço de usuários."
   exit 1
 fi
