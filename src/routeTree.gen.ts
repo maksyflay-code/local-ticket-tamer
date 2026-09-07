@@ -10,33 +10,311 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ChamadosRouteImport } from './routes/chamados'
+import { Route as ClientesRouteImport } from './routes/clientes'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DocumentosRouteImport } from './routes/documentos'
+import { Route as EquipamentosRouteImport } from './routes/equipamentos'
+import { Route as EstatisticasRouteImport } from './routes/estatisticas'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ManutencoesRouteImport } from './routes/manutencoes'
+import { Route as NotificacoesRouteImport } from './routes/notificacoes'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as PlanosRouteImport } from './routes/planos'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as RfoRouteImport } from './routes/rfo'
+import { Route as SolicitacoesRouteImport } from './routes/solicitacoes'
+import { Route as TransitoVtalRouteImport } from './routes/transito-vtal'
+import { Route as UsuariosRouteImport } from './routes/usuarios'
+import { Route as ClientesIdRouteImport } from './routes/clientes_.$id'
+import { Route as ConfiguracoesSlaRouteImport } from './routes/configuracoes.sla'
+import { Route as NotificacoesPreferenciasRouteImport } from './routes/notificacoes.preferencias'
+import { Route as ApiPublicDiagRouteImport } from './routes/api/public/_diag'
+import { Route as ApiPublicHooksTelegramManutencaoRouteImport } from './routes/api/public/hooks/telegram-manutencao'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ChamadosRoute = ChamadosRouteImport.update({
+  id: '/chamados',
+  path: '/chamados',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientesRoute = ClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentosRoute = DocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipamentosRoute = EquipamentosRouteImport.update({
+  id: '/equipamentos',
+  path: '/equipamentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstatisticasRoute = EstatisticasRouteImport.update({
+  id: '/estatisticas',
+  path: '/estatisticas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManutencoesRoute = ManutencoesRouteImport.update({
+  id: '/manutencoes',
+  path: '/manutencoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificacoesRoute = NotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanosRoute = PlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RfoRoute = RfoRouteImport.update({
+  id: '/rfo',
+  path: '/rfo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SolicitacoesRoute = SolicitacoesRouteImport.update({
+  id: '/solicitacoes',
+  path: '/solicitacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransitoVtalRoute = TransitoVtalRouteImport.update({
+  id: '/transito-vtal',
+  path: '/transito-vtal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsuariosRoute = UsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientesIdRoute = ClientesIdRouteImport.update({
+  id: '/clientes_/$id',
+  path: '/clientes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesSlaRoute = ConfiguracoesSlaRouteImport.update({
+  id: '/configuracoes/sla',
+  path: '/configuracoes/sla',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificacoesPreferenciasRoute =
+  NotificacoesPreferenciasRouteImport.update({
+    id: '/preferencias',
+    path: '/preferencias',
+    getParentRoute: () => NotificacoesRoute,
+  } as any)
+const ApiPublicDiagRoute = ApiPublicDiagRouteImport.update({
+  id: '/api/public/_diag',
+  path: '/api/public',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksTelegramManutencaoRoute =
+  ApiPublicHooksTelegramManutencaoRouteImport.update({
+    id: '/api/public/hooks/telegram-manutencao',
+    path: '/api/public/hooks/telegram-manutencao',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/chamados': typeof ChamadosRoute
+  '/clientes': typeof ClientesRoute
+  '/dashboard': typeof DashboardRoute
+  '/documentos': typeof DocumentosRoute
+  '/equipamentos': typeof EquipamentosRoute
+  '/estatisticas': typeof EstatisticasRoute
+  '/login': typeof LoginRoute
+  '/manutencoes': typeof ManutencoesRoute
+  '/notificacoes': typeof NotificacoesRouteWithChildren
+  '/perfil': typeof PerfilRoute
+  '/planos': typeof PlanosRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/rfo': typeof RfoRoute
+  '/solicitacoes': typeof SolicitacoesRoute
+  '/transito-vtal': typeof TransitoVtalRoute
+  '/usuarios': typeof UsuariosRoute
+  '/clientes/$id': typeof ClientesIdRoute
+  '/configuracoes/sla': typeof ConfiguracoesSlaRoute
+  '/notificacoes/preferencias': typeof NotificacoesPreferenciasRoute
+  '/api/public': typeof ApiPublicDiagRoute
+  '/api/public/hooks/telegram-manutencao': typeof ApiPublicHooksTelegramManutencaoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/chamados': typeof ChamadosRoute
+  '/clientes': typeof ClientesRoute
+  '/dashboard': typeof DashboardRoute
+  '/documentos': typeof DocumentosRoute
+  '/equipamentos': typeof EquipamentosRoute
+  '/estatisticas': typeof EstatisticasRoute
+  '/login': typeof LoginRoute
+  '/manutencoes': typeof ManutencoesRoute
+  '/notificacoes': typeof NotificacoesRouteWithChildren
+  '/perfil': typeof PerfilRoute
+  '/planos': typeof PlanosRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/rfo': typeof RfoRoute
+  '/solicitacoes': typeof SolicitacoesRoute
+  '/transito-vtal': typeof TransitoVtalRoute
+  '/usuarios': typeof UsuariosRoute
+  '/clientes/$id': typeof ClientesIdRoute
+  '/configuracoes/sla': typeof ConfiguracoesSlaRoute
+  '/notificacoes/preferencias': typeof NotificacoesPreferenciasRoute
+  '/api/public': typeof ApiPublicDiagRoute
+  '/api/public/hooks/telegram-manutencao': typeof ApiPublicHooksTelegramManutencaoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/chamados': typeof ChamadosRoute
+  '/clientes': typeof ClientesRoute
+  '/dashboard': typeof DashboardRoute
+  '/documentos': typeof DocumentosRoute
+  '/equipamentos': typeof EquipamentosRoute
+  '/estatisticas': typeof EstatisticasRoute
+  '/login': typeof LoginRoute
+  '/manutencoes': typeof ManutencoesRoute
+  '/notificacoes': typeof NotificacoesRouteWithChildren
+  '/perfil': typeof PerfilRoute
+  '/planos': typeof PlanosRoute
+  '/relatorios': typeof RelatoriosRoute
+  '/rfo': typeof RfoRoute
+  '/solicitacoes': typeof SolicitacoesRoute
+  '/transito-vtal': typeof TransitoVtalRoute
+  '/usuarios': typeof UsuariosRoute
+  '/clientes_/$id': typeof ClientesIdRoute
+  '/configuracoes/sla': typeof ConfiguracoesSlaRoute
+  '/notificacoes/preferencias': typeof NotificacoesPreferenciasRoute
+  '/api/public/_diag': typeof ApiPublicDiagRoute
+  '/api/public/hooks/telegram-manutencao': typeof ApiPublicHooksTelegramManutencaoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/chamados'
+    | '/clientes'
+    | '/dashboard'
+    | '/documentos'
+    | '/equipamentos'
+    | '/estatisticas'
+    | '/login'
+    | '/manutencoes'
+    | '/notificacoes'
+    | '/perfil'
+    | '/planos'
+    | '/relatorios'
+    | '/rfo'
+    | '/solicitacoes'
+    | '/transito-vtal'
+    | '/usuarios'
+    | '/clientes/$id'
+    | '/configuracoes/sla'
+    | '/notificacoes/preferencias'
+    | '/api/public'
+    | '/api/public/hooks/telegram-manutencao'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/chamados'
+    | '/clientes'
+    | '/dashboard'
+    | '/documentos'
+    | '/equipamentos'
+    | '/estatisticas'
+    | '/login'
+    | '/manutencoes'
+    | '/notificacoes'
+    | '/perfil'
+    | '/planos'
+    | '/relatorios'
+    | '/rfo'
+    | '/solicitacoes'
+    | '/transito-vtal'
+    | '/usuarios'
+    | '/clientes/$id'
+    | '/configuracoes/sla'
+    | '/notificacoes/preferencias'
+    | '/api/public'
+    | '/api/public/hooks/telegram-manutencao'
+  id:
+    | '__root__'
+    | '/'
+    | '/chamados'
+    | '/clientes'
+    | '/dashboard'
+    | '/documentos'
+    | '/equipamentos'
+    | '/estatisticas'
+    | '/login'
+    | '/manutencoes'
+    | '/notificacoes'
+    | '/perfil'
+    | '/planos'
+    | '/relatorios'
+    | '/rfo'
+    | '/solicitacoes'
+    | '/transito-vtal'
+    | '/usuarios'
+    | '/clientes_/$id'
+    | '/configuracoes/sla'
+    | '/notificacoes/preferencias'
+    | '/api/public/_diag'
+    | '/api/public/hooks/telegram-manutencao'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ChamadosRoute: typeof ChamadosRoute
+  ClientesRoute: typeof ClientesRoute
+  DashboardRoute: typeof DashboardRoute
+  DocumentosRoute: typeof DocumentosRoute
+  EquipamentosRoute: typeof EquipamentosRoute
+  EstatisticasRoute: typeof EstatisticasRoute
+  LoginRoute: typeof LoginRoute
+  ManutencoesRoute: typeof ManutencoesRoute
+  NotificacoesRoute: typeof NotificacoesRouteWithChildren
+  PerfilRoute: typeof PerfilRoute
+  PlanosRoute: typeof PlanosRoute
+  RelatoriosRoute: typeof RelatoriosRoute
+  RfoRoute: typeof RfoRoute
+  SolicitacoesRoute: typeof SolicitacoesRoute
+  TransitoVtalRoute: typeof TransitoVtalRoute
+  UsuariosRoute: typeof UsuariosRoute
+  ClientesIdRoute: typeof ClientesIdRoute
+  ConfiguracoesSlaRoute: typeof ConfiguracoesSlaRoute
+  ApiPublicDiagRoute: typeof ApiPublicDiagRoute
+  ApiPublicHooksTelegramManutencaoRoute: typeof ApiPublicHooksTelegramManutencaoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +326,190 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/chamados': {
+      id: '/chamados'
+      path: '/chamados'
+      fullPath: '/chamados'
+      preLoaderRoute: typeof ChamadosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clientes': {
+      id: '/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof ClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documentos': {
+      id: '/documentos'
+      path: '/documentos'
+      fullPath: '/documentos'
+      preLoaderRoute: typeof DocumentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipamentos': {
+      id: '/equipamentos'
+      path: '/equipamentos'
+      fullPath: '/equipamentos'
+      preLoaderRoute: typeof EquipamentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estatisticas': {
+      id: '/estatisticas'
+      path: '/estatisticas'
+      fullPath: '/estatisticas'
+      preLoaderRoute: typeof EstatisticasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manutencoes': {
+      id: '/manutencoes'
+      path: '/manutencoes'
+      fullPath: '/manutencoes'
+      preLoaderRoute: typeof ManutencoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notificacoes': {
+      id: '/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof NotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planos': {
+      id: '/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof PlanosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rfo': {
+      id: '/rfo'
+      path: '/rfo'
+      fullPath: '/rfo'
+      preLoaderRoute: typeof RfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/solicitacoes': {
+      id: '/solicitacoes'
+      path: '/solicitacoes'
+      fullPath: '/solicitacoes'
+      preLoaderRoute: typeof SolicitacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transito-vtal': {
+      id: '/transito-vtal'
+      path: '/transito-vtal'
+      fullPath: '/transito-vtal'
+      preLoaderRoute: typeof TransitoVtalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/usuarios': {
+      id: '/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof UsuariosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/clientes_/$id': {
+      id: '/clientes_/$id'
+      path: '/clientes/$id'
+      fullPath: '/clientes/$id'
+      preLoaderRoute: typeof ClientesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes/sla': {
+      id: '/configuracoes/sla'
+      path: '/configuracoes/sla'
+      fullPath: '/configuracoes/sla'
+      preLoaderRoute: typeof ConfiguracoesSlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notificacoes/preferencias': {
+      id: '/notificacoes/preferencias'
+      path: '/preferencias'
+      fullPath: '/notificacoes/preferencias'
+      preLoaderRoute: typeof NotificacoesPreferenciasRouteImport
+      parentRoute: typeof NotificacoesRoute
+    }
+    '/api/public/_diag': {
+      id: '/api/public/_diag'
+      path: '/api/public'
+      fullPath: '/api/public'
+      preLoaderRoute: typeof ApiPublicDiagRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/telegram-manutencao': {
+      id: '/api/public/hooks/telegram-manutencao'
+      path: '/api/public/hooks/telegram-manutencao'
+      fullPath: '/api/public/hooks/telegram-manutencao'
+      preLoaderRoute: typeof ApiPublicHooksTelegramManutencaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface NotificacoesRouteChildren {
+  NotificacoesPreferenciasRoute: typeof NotificacoesPreferenciasRoute
+}
+
+const NotificacoesRouteChildren: NotificacoesRouteChildren = {
+  NotificacoesPreferenciasRoute: NotificacoesPreferenciasRoute,
+}
+
+const NotificacoesRouteWithChildren = NotificacoesRoute._addFileChildren(
+  NotificacoesRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ChamadosRoute: ChamadosRoute,
+  ClientesRoute: ClientesRoute,
+  DashboardRoute: DashboardRoute,
+  DocumentosRoute: DocumentosRoute,
+  EquipamentosRoute: EquipamentosRoute,
+  EstatisticasRoute: EstatisticasRoute,
+  LoginRoute: LoginRoute,
+  ManutencoesRoute: ManutencoesRoute,
+  NotificacoesRoute: NotificacoesRouteWithChildren,
+  PerfilRoute: PerfilRoute,
+  PlanosRoute: PlanosRoute,
+  RelatoriosRoute: RelatoriosRoute,
+  RfoRoute: RfoRoute,
+  SolicitacoesRoute: SolicitacoesRoute,
+  TransitoVtalRoute: TransitoVtalRoute,
+  UsuariosRoute: UsuariosRoute,
+  ClientesIdRoute: ClientesIdRoute,
+  ConfiguracoesSlaRoute: ConfiguracoesSlaRoute,
+  ApiPublicDiagRoute: ApiPublicDiagRoute,
+  ApiPublicHooksTelegramManutencaoRoute: ApiPublicHooksTelegramManutencaoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

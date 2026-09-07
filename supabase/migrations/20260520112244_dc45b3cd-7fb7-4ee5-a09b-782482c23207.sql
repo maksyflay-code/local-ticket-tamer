@@ -1,0 +1,1 @@
+alter type public.chamado_status add value if not exists 'aguardando_cliente' after 'em_andamento';

@@ -1,0 +1,1 @@
+ALTER TYPE public.solicitacao_tipo ADD VALUE IF NOT EXISTS 'cotacao';
