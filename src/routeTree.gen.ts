@@ -9,102 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UsuariosRouteImport } from './routes/usuarios'
-import { Route as TransitoVtalRouteImport } from './routes/transito-vtal'
-import { Route as SolicitacoesRouteImport } from './routes/solicitacoes'
-import { Route as RfoRouteImport } from './routes/rfo'
-import { Route as RelatoriosRouteImport } from './routes/relatorios'
-import { Route as PlanosRouteImport } from './routes/planos'
-import { Route as PerfilRouteImport } from './routes/perfil'
-import { Route as NotificacoesRouteImport } from './routes/notificacoes'
-import { Route as ManutencoesRouteImport } from './routes/manutencoes'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as EstatisticasRouteImport } from './routes/estatisticas'
-import { Route as EquipamentosRouteImport } from './routes/equipamentos'
-import { Route as DocumentosRouteImport } from './routes/documentos'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as ClientesRouteImport } from './routes/clientes'
-import { Route as ChamadosRouteImport } from './routes/chamados'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as NotificacoesPreferenciasRouteImport } from './routes/notificacoes.preferencias'
-import { Route as ConfiguracoesSlaRouteImport } from './routes/configuracoes.sla'
+import { Route as ChamadosRouteImport } from './routes/chamados'
+import { Route as ClientesRouteImport } from './routes/clientes'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as DocumentosRouteImport } from './routes/documentos'
+import { Route as EquipamentosRouteImport } from './routes/equipamentos'
+import { Route as EstatisticasRouteImport } from './routes/estatisticas'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ManutencoesRouteImport } from './routes/manutencoes'
+import { Route as NotificacoesRouteImport } from './routes/notificacoes'
+import { Route as PerfilRouteImport } from './routes/perfil'
+import { Route as PlanosRouteImport } from './routes/planos'
+import { Route as RelatoriosRouteImport } from './routes/relatorios'
+import { Route as RfoRouteImport } from './routes/rfo'
+import { Route as SolicitacoesRouteImport } from './routes/solicitacoes'
+import { Route as TransitoVtalRouteImport } from './routes/transito-vtal'
+import { Route as UsuariosRouteImport } from './routes/usuarios'
 import { Route as ClientesIdRouteImport } from './routes/clientes_.$id'
+import { Route as ConfiguracoesSlaRouteImport } from './routes/configuracoes.sla'
+import { Route as NotificacoesPreferenciasRouteImport } from './routes/notificacoes.preferencias'
 import { Route as ApiPublicDiagRouteImport } from './routes/api/public/_diag'
 import { Route as ApiPublicHooksTelegramManutencaoRouteImport } from './routes/api/public/hooks/telegram-manutencao'
 
-const UsuariosRoute = UsuariosRouteImport.update({
-  id: '/usuarios',
-  path: '/usuarios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TransitoVtalRoute = TransitoVtalRouteImport.update({
-  id: '/transito-vtal',
-  path: '/transito-vtal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SolicitacoesRoute = SolicitacoesRouteImport.update({
-  id: '/solicitacoes',
-  path: '/solicitacoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RfoRoute = RfoRouteImport.update({
-  id: '/rfo',
-  path: '/rfo',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RelatoriosRoute = RelatoriosRouteImport.update({
-  id: '/relatorios',
-  path: '/relatorios',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PlanosRoute = PlanosRouteImport.update({
-  id: '/planos',
-  path: '/planos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PerfilRoute = PerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NotificacoesRoute = NotificacoesRouteImport.update({
-  id: '/notificacoes',
-  path: '/notificacoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ManutencoesRoute = ManutencoesRouteImport.update({
-  id: '/manutencoes',
-  path: '/manutencoes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EstatisticasRoute = EstatisticasRouteImport.update({
-  id: '/estatisticas',
-  path: '/estatisticas',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EquipamentosRoute = EquipamentosRouteImport.update({
-  id: '/equipamentos',
-  path: '/equipamentos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DocumentosRoute = DocumentosRouteImport.update({
-  id: '/documentos',
-  path: '/documentos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClientesRoute = ClientesRouteImport.update({
-  id: '/clientes',
-  path: '/clientes',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChamadosRoute = ChamadosRouteImport.update({
@@ -112,9 +42,89 @@ const ChamadosRoute = ChamadosRouteImport.update({
   path: '/chamados',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ClientesRoute = ClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentosRoute = DocumentosRouteImport.update({
+  id: '/documentos',
+  path: '/documentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EquipamentosRoute = EquipamentosRouteImport.update({
+  id: '/equipamentos',
+  path: '/equipamentos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstatisticasRoute = EstatisticasRouteImport.update({
+  id: '/estatisticas',
+  path: '/estatisticas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManutencoesRoute = ManutencoesRouteImport.update({
+  id: '/manutencoes',
+  path: '/manutencoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificacoesRoute = NotificacoesRouteImport.update({
+  id: '/notificacoes',
+  path: '/notificacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PerfilRoute = PerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanosRoute = PlanosRouteImport.update({
+  id: '/planos',
+  path: '/planos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RelatoriosRoute = RelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RfoRoute = RfoRouteImport.update({
+  id: '/rfo',
+  path: '/rfo',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SolicitacoesRoute = SolicitacoesRouteImport.update({
+  id: '/solicitacoes',
+  path: '/solicitacoes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransitoVtalRoute = TransitoVtalRouteImport.update({
+  id: '/transito-vtal',
+  path: '/transito-vtal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsuariosRoute = UsuariosRouteImport.update({
+  id: '/usuarios',
+  path: '/usuarios',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientesIdRoute = ClientesIdRouteImport.update({
+  id: '/clientes_/$id',
+  path: '/clientes/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesSlaRoute = ConfiguracoesSlaRouteImport.update({
+  id: '/configuracoes/sla',
+  path: '/configuracoes/sla',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificacoesPreferenciasRoute =
@@ -123,16 +133,6 @@ const NotificacoesPreferenciasRoute =
     path: '/preferencias',
     getParentRoute: () => NotificacoesRoute,
   } as any)
-const ConfiguracoesSlaRoute = ConfiguracoesSlaRouteImport.update({
-  id: '/configuracoes/sla',
-  path: '/configuracoes/sla',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClientesIdRoute = ClientesIdRouteImport.update({
-  id: '/clientes_/$id',
-  path: '/clientes/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicDiagRoute = ApiPublicDiagRouteImport.update({
   id: '/api/public/_diag',
   path: '/api/public',
@@ -319,109 +319,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/usuarios': {
-      id: '/usuarios'
-      path: '/usuarios'
-      fullPath: '/usuarios'
-      preLoaderRoute: typeof UsuariosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/transito-vtal': {
-      id: '/transito-vtal'
-      path: '/transito-vtal'
-      fullPath: '/transito-vtal'
-      preLoaderRoute: typeof TransitoVtalRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/solicitacoes': {
-      id: '/solicitacoes'
-      path: '/solicitacoes'
-      fullPath: '/solicitacoes'
-      preLoaderRoute: typeof SolicitacoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/rfo': {
-      id: '/rfo'
-      path: '/rfo'
-      fullPath: '/rfo'
-      preLoaderRoute: typeof RfoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/relatorios': {
-      id: '/relatorios'
-      path: '/relatorios'
-      fullPath: '/relatorios'
-      preLoaderRoute: typeof RelatoriosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/planos': {
-      id: '/planos'
-      path: '/planos'
-      fullPath: '/planos'
-      preLoaderRoute: typeof PlanosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/perfil': {
-      id: '/perfil'
-      path: '/perfil'
-      fullPath: '/perfil'
-      preLoaderRoute: typeof PerfilRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/notificacoes': {
-      id: '/notificacoes'
-      path: '/notificacoes'
-      fullPath: '/notificacoes'
-      preLoaderRoute: typeof NotificacoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/manutencoes': {
-      id: '/manutencoes'
-      path: '/manutencoes'
-      fullPath: '/manutencoes'
-      preLoaderRoute: typeof ManutencoesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/estatisticas': {
-      id: '/estatisticas'
-      path: '/estatisticas'
-      fullPath: '/estatisticas'
-      preLoaderRoute: typeof EstatisticasRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/equipamentos': {
-      id: '/equipamentos'
-      path: '/equipamentos'
-      fullPath: '/equipamentos'
-      preLoaderRoute: typeof EquipamentosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/documentos': {
-      id: '/documentos'
-      path: '/documentos'
-      fullPath: '/documentos'
-      preLoaderRoute: typeof DocumentosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/clientes': {
-      id: '/clientes'
-      path: '/clientes'
-      fullPath: '/clientes'
-      preLoaderRoute: typeof ClientesRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chamados': {
@@ -431,25 +333,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ChamadosRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/clientes': {
+      id: '/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof ClientesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/notificacoes/preferencias': {
-      id: '/notificacoes/preferencias'
-      path: '/preferencias'
-      fullPath: '/notificacoes/preferencias'
-      preLoaderRoute: typeof NotificacoesPreferenciasRouteImport
-      parentRoute: typeof NotificacoesRoute
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/configuracoes/sla': {
-      id: '/configuracoes/sla'
-      path: '/configuracoes/sla'
-      fullPath: '/configuracoes/sla'
-      preLoaderRoute: typeof ConfiguracoesSlaRouteImport
+    '/documentos': {
+      id: '/documentos'
+      path: '/documentos'
+      fullPath: '/documentos'
+      preLoaderRoute: typeof DocumentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/equipamentos': {
+      id: '/equipamentos'
+      path: '/equipamentos'
+      fullPath: '/equipamentos'
+      preLoaderRoute: typeof EquipamentosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estatisticas': {
+      id: '/estatisticas'
+      path: '/estatisticas'
+      fullPath: '/estatisticas'
+      preLoaderRoute: typeof EstatisticasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manutencoes': {
+      id: '/manutencoes'
+      path: '/manutencoes'
+      fullPath: '/manutencoes'
+      preLoaderRoute: typeof ManutencoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notificacoes': {
+      id: '/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof NotificacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/perfil': {
+      id: '/perfil'
+      path: '/perfil'
+      fullPath: '/perfil'
+      preLoaderRoute: typeof PerfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planos': {
+      id: '/planos'
+      path: '/planos'
+      fullPath: '/planos'
+      preLoaderRoute: typeof PlanosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/relatorios': {
+      id: '/relatorios'
+      path: '/relatorios'
+      fullPath: '/relatorios'
+      preLoaderRoute: typeof RelatoriosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/rfo': {
+      id: '/rfo'
+      path: '/rfo'
+      fullPath: '/rfo'
+      preLoaderRoute: typeof RfoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/solicitacoes': {
+      id: '/solicitacoes'
+      path: '/solicitacoes'
+      fullPath: '/solicitacoes'
+      preLoaderRoute: typeof SolicitacoesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transito-vtal': {
+      id: '/transito-vtal'
+      path: '/transito-vtal'
+      fullPath: '/transito-vtal'
+      preLoaderRoute: typeof TransitoVtalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/usuarios': {
+      id: '/usuarios'
+      path: '/usuarios'
+      fullPath: '/usuarios'
+      preLoaderRoute: typeof UsuariosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/clientes_/$id': {
@@ -458,6 +444,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/clientes/$id'
       preLoaderRoute: typeof ClientesIdRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes/sla': {
+      id: '/configuracoes/sla'
+      path: '/configuracoes/sla'
+      fullPath: '/configuracoes/sla'
+      preLoaderRoute: typeof ConfiguracoesSlaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notificacoes/preferencias': {
+      id: '/notificacoes/preferencias'
+      path: '/preferencias'
+      fullPath: '/notificacoes/preferencias'
+      preLoaderRoute: typeof NotificacoesPreferenciasRouteImport
+      parentRoute: typeof NotificacoesRoute
     }
     '/api/public/_diag': {
       id: '/api/public/_diag'
@@ -516,10 +516,11 @@ export const routeTree = rootRouteImport
   ._addFileTypes<FileRouteTypes>()
 
 import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
+import type { startInstance } from './start.ts'
 declare module '@tanstack/react-start' {
   interface Register {
     ssr: true
     router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
   }
 }
