@@ -18,27 +18,41 @@ docker compose exec -T db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres 
   -v email="$EMAIL" -v senha="$SENHA" <<'SQL'
 create extension if not exists pgcrypto with schema extensions;
 
-with upsert as (
-  insert into auth.users (
-    instance_id, id, aud, role, email, encrypted_password,
-    email_confirmed_at, created_at, updated_at,
-    raw_app_meta_data, raw_user_meta_data
-  )
-  values (
-    '00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated', 'authenticated',
-    lower(:'email'), extensions.crypt(:'senha', extensions.gen_salt('bf')),
-    now(), now(), now(),
-    '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb
-  )
-  on conflict (instance_id, lower(email::text)) do update
-    set encrypted_password = extensions.crypt(:'senha', extensions.gen_salt('bf')),
-        email_confirmed_at = now(),
-        updated_at = now()
-  returning id
-)
-insert into public.user_roles (user_id, role)
-select id, 'admin' from upsert
-on conflict do nothing;
+do $$
+declare
+  v_email text := lower(current_setting('myapp.email', true));
+  v_senha text := current_setting('myapp.senha', true);
+  v_id uuid;
+begin
+  select id into v_id from auth.users where lower(email) = v_email limit 1;
+
+  if v_id is null then
+    v_id := gen_random_uuid();
+    insert into auth.users (
+      instance_id, id, aud, role, email, encrypted_password,
+      email_confirmed_at, created_at, updated_at,
+      raw_app_meta_data, raw_user_meta_data
+    ) values (
+      '00000000-0000-0000-0000-000000000000', v_id, 'authenticated', 'authenticated',
+      v_email, extensions.crypt(v_senha, extensions.gen_salt('bf')),
+      now(), now(), now(),
+      '{"provider":"email","providers":["email"]}'::jsonb, '{}'::jsonb
+    );
+  else
+    update auth.users
+       set encrypted_password = extensions.crypt(v_senha, extensions.gen_salt('bf')),
+           email_confirmed_at = coalesce(email_confirmed_at, now()),
+           updated_at = now()
+     where id = v_id;
+  end if;
+
+  begin
+    insert into public.user_roles (user_id, role) values (v_id, 'admin')
+    on conflict do nothing;
+  exception when undefined_table or undefined_object then
+    raise notice 'tabela de perfis/papeis nao encontrada, seguindo';
+  end;
+end $$;
 SQL
 
 echo "Administrador pronto: $EMAIL"
