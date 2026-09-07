@@ -16,24 +16,24 @@ BEGIN
   END LOOP;
 END $$;
 
--- ---------- roles com login ----------
-DO $$
-DECLARE
-  r text;
-  pass text := :'pgpass';
-BEGIN
-  FOREACH r IN ARRAY ARRAY[
-    'authenticator','pgbouncer','supabase_auth_admin','supabase_functions_admin',
-    'supabase_storage_admin','supabase_read_only_user','supabase_replication_admin',
-    'supabase_realtime_admin','dashboard_user'
-  ] LOOP
-    IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r) THEN
-      EXECUTE format('CREATE ROLE %I LOGIN NOINHERIT PASSWORD %L', r, pass);
-    ELSE
-      EXECUTE format('ALTER ROLE %I WITH LOGIN PASSWORD %L', r, pass);
-    END IF;
-  END LOOP;
-END $$;
+-- Variaveis do psql nao sao expandidas dentro de blocos DO com dollar quote.
+-- Geramos os comandos como linhas SQL e usamos \gexec para aplicar a senha.
+SELECT format('CREATE ROLE %I LOGIN NOINHERIT PASSWORD %L', role_name, :'pgpass')
+FROM unnest(ARRAY[
+  'authenticator','pgbouncer','supabase_auth_admin','supabase_functions_admin',
+  'supabase_storage_admin','supabase_read_only_user','supabase_replication_admin',
+  'supabase_realtime_admin','dashboard_user'
+]) AS role_name
+WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name)
+\gexec
+
+SELECT format('ALTER ROLE %I WITH LOGIN PASSWORD %L', role_name, :'pgpass')
+FROM unnest(ARRAY[
+  'authenticator','pgbouncer','supabase_auth_admin','supabase_functions_admin',
+  'supabase_storage_admin','supabase_read_only_user','supabase_replication_admin',
+  'supabase_realtime_admin','dashboard_user'
+]) AS role_name
+\gexec
 
 ALTER ROLE authenticator NOINHERIT;
 ALTER ROLE supabase_auth_admin WITH CREATEROLE CREATEDB;

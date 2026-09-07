@@ -9,9 +9,17 @@ ENV_FILE="$ROOT/docker/.env"
 command -v docker >/dev/null || { echo "Docker não encontrado. Instale o Docker primeiro."; exit 1; }
 docker compose version >/dev/null || { echo "Plugin 'docker compose' não encontrado."; exit 1; }
 
+NEEDS_CONFIG=false
 if [ ! -f "$ENV_FILE" ]; then
-  echo "==> Criando docker/.env"
   cp "$ROOT/docker/.env.example" "$ENV_FILE"
+  NEEDS_CONFIG=true
+elif grep -q '^POSTGRES_PASSWORD=troque-esta-senha$' "$ENV_FILE" \
+  || grep -qE '^(JWT_SECRET|SECRET_KEY_BASE|ANON_KEY|SERVICE_ROLE_KEY)=$' "$ENV_FILE"; then
+  NEEDS_CONFIG=true
+fi
+
+if [ "$NEEDS_CONFIG" = true ]; then
+  echo "==> Configurando docker/.env"
 
   read -rp "Endereço de acesso ao sistema (ex: http://192.168.0.10:8080): " SITE
   SITE="${SITE:-http://localhost:8080}"
