@@ -5,7 +5,10 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT/docker"
 
-PSQL=(docker compose exec -T db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres)
+# Carrega POSTGRES_PASSWORD do .env e passa ao psql sem pedir no teclado
+set -a; . ./.env; set +a
+
+PSQL=(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres)
 
 "${PSQL[@]}" -c "CREATE TABLE IF NOT EXISTS public._migracoes_aplicadas (nome text primary key, aplicada_em timestamptz default now());" >/dev/null
 
