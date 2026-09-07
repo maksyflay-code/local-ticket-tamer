@@ -75,6 +75,10 @@ CREATE SCHEMA IF NOT EXISTS realtime AUTHORIZATION supabase_admin;
 CREATE SCHEMA IF NOT EXISTS _realtime AUTHORIZATION supabase_admin;
 CREATE SCHEMA IF NOT EXISTS graphql_public;
 
+-- O serviço de autenticação precisa ser dono do schema e das funções que
+-- mantém durante as próprias migrações. Corrige também volumes já existentes.
+ALTER SCHEMA auth OWNER TO supabase_auth_admin;
+
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pgjwt WITH SCHEMA extensions;
@@ -89,40 +93,17 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon, authenticated, service_role;
 
--- ---------- auth.uid()/auth.role()/auth.jwt() ----------
-CREATE OR REPLACE FUNCTION auth.uid() RETURNS uuid
-LANGUAGE sql STABLE AS $$
-  SELECT nullif(coalesce(
-    current_setting('request.jwt.claim.sub', true),
-    (current_setting('request.jwt.claims', true)::jsonb ->> 'sub')
-  ), '')::uuid
-$$;
-
-CREATE OR REPLACE FUNCTION auth.role() RETURNS text
-LANGUAGE sql STABLE AS $$
-  SELECT nullif(coalesce(
-    current_setting('request.jwt.claim.role', true),
-    (current_setting('request.jwt.claims', true)::jsonb ->> 'role')
-  ), '')::text
-$$;
-
-CREATE OR REPLACE FUNCTION auth.email() RETURNS text
-LANGUAGE sql STABLE AS $$
-  SELECT nullif(coalesce(
-    current_setting('request.jwt.claim.email', true),
-    (current_setting('request.jwt.claims', true)::jsonb ->> 'email')
-  ), '')::text
-$$;
-
-CREATE OR REPLACE FUNCTION auth.jwt() RETURNS jsonb
-LANGUAGE sql STABLE AS $$
-  SELECT coalesce(
-    nullif(current_setting('request.jwt.claim', true), ''),
-    nullif(current_setting('request.jwt.claims', true), '')
-  )::jsonb
-$$;
+-- Corrige funções deixadas por versões anteriores. O serviço de autenticação
+-- criará e atualizará auth.uid()/auth.role() ao iniciar.
+DO $$
+DECLARE function_name text;
+BEGIN
+  FOREACH function_name IN ARRAY ARRAY['uid','role','email','jwt'] LOOP
+    IF to_regprocedure(format('auth.%I()', function_name)) IS NOT NULL THEN
+      EXECUTE format('ALTER FUNCTION auth.%I() OWNER TO supabase_auth_admin', function_name);
+    END IF;
+  END LOOP;
+END $$;
 
 GRANT USAGE ON SCHEMA auth TO anon, authenticated, service_role;
-GRANT EXECUTE ON FUNCTION auth.uid(), auth.role(), auth.email(), auth.jwt()
-  TO anon, authenticated, service_role;
 SQL

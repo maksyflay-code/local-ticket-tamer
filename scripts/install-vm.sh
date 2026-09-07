@@ -125,6 +125,12 @@ if [ "$AUTH_READY" != true ]; then
   exit 1
 fi
 
+echo "==> Finalizando funções de autenticação"
+docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
+  psql --no-password --host 127.0.0.1 --username supabase_auth_admin \
+  --dbname "$POSTGRES_DB" -v ON_ERROR_STOP=1 \
+  < "$ROOT/docker/init/01-auth-functions.sql"
+
 echo "==> Aplicando as migrações do sistema"
 bash "$ROOT/scripts/apply-migrations.sh"
 
