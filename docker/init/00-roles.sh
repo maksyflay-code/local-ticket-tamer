@@ -5,11 +5,12 @@ set -e
 
 PSQL_CONNECTION=(--host 127.0.0.1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB")
 if [ "${REPAIR_EXISTING_DB:-false}" = "true" ]; then
-  # Em volumes existentes, a senha gravada no PostgreSQL pode ser diferente
-  # da senha atual do .env. O usuário local postgres entra por autenticação
-  # peer e consegue sincronizá-la sem solicitar senha no terminal.
-  unset PGPASSWORD
-  PSQL_CONNECTION=(--username postgres --dbname "$POSTGRES_DB")
+  # Instalações antigas iniciavam o volume com esta senha provisória.
+  # Tente primeiro a senha atual e depois a provisória, sem interação.
+  export PGPASSWORD="$POSTGRES_PASSWORD"
+  if ! psql "${PSQL_CONNECTION[@]}" -tAc 'select 1' >/dev/null 2>&1; then
+    export PGPASSWORD="troque-esta-senha"
+  fi
 else
   export PGPASSWORD="$POSTGRES_PASSWORD"
 fi

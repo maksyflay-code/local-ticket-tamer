@@ -63,7 +63,7 @@ if [ "$DB_READY" != true ]; then
 fi
 
 echo "==> Conferindo contas internas do banco"
-docker compose exec -T --user postgres -e REPAIR_EXISTING_DB=true \
+docker compose exec -T -e REPAIR_EXISTING_DB=true \
   db bash /docker-entrypoint-initdb.d/00-roles.sh
 
 echo "==> Subindo os demais serviços locais"
