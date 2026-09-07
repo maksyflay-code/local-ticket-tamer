@@ -45,14 +45,28 @@ fi
 
 cd "$ROOT/docker"
 
-echo "==> Subindo banco de dados e serviços locais"
-docker compose up -d db auth rest realtime storage meta kong
+echo "==> Subindo banco de dados local"
+docker compose up -d db
 
 echo "==> Aguardando o banco ficar pronto"
+DB_READY=false
 for i in $(seq 1 60); do
-  if docker compose exec -T db pg_isready -U supabase_admin >/dev/null 2>&1; then break; fi
+  if docker compose exec -T db pg_isready -U supabase_admin -d postgres >/dev/null 2>&1; then
+    DB_READY=true
+    break
+  fi
   sleep 2
 done
+if [ "$DB_READY" != true ]; then
+  echo "ERRO: o banco não ficou pronto. Execute: docker logs ivi-db --tail 100"
+  exit 1
+fi
+
+echo "==> Conferindo contas internas do banco"
+docker compose exec -T db bash /docker-entrypoint-initdb.d/00-roles.sh
+
+echo "==> Subindo os demais serviços locais"
+docker compose up -d auth rest realtime storage meta kong
 sleep 10  # tempo para auth/storage criarem seus schemas
 
 echo "==> Aplicando as migrações do sistema"

@@ -23,7 +23,7 @@ FROM unnest(ARRAY[
   'authenticator','pgbouncer','supabase_auth_admin','supabase_functions_admin',
   'supabase_storage_admin','supabase_read_only_user','supabase_replication_admin',
   'supabase_realtime_admin','dashboard_user'
-]) AS role_name
+]) AS roles(role_name)
 WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = role_name)
 \gexec
 
@@ -32,7 +32,10 @@ FROM unnest(ARRAY[
   'authenticator','pgbouncer','supabase_auth_admin','supabase_functions_admin',
   'supabase_storage_admin','supabase_read_only_user','supabase_replication_admin',
   'supabase_realtime_admin','dashboard_user'
-]) AS role_name
+]) AS roles(role_name)
+\gexec
+
+SELECT format('ALTER ROLE supabase_admin WITH LOGIN PASSWORD %L', :'pgpass')
 \gexec
 
 ALTER ROLE authenticator NOINHERIT;
