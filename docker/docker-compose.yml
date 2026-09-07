@@ -23,12 +23,13 @@ services:
       - "${POSTGRES_PORT_EXPOSED}:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
-      - ./init/00-roles.sql:/docker-entrypoint-initdb.d/00-roles.sql:ro
+      - ./init/00-roles.sh:/docker-entrypoint-initdb.d/00-roles.sh:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U supabase_admin -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 30
+      start_period: 60s
 
   auth:
     image: supabase/gotrue:v2.170.0
