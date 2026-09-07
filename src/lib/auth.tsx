@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -40,44 +40,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionStartedAt, setSessionStartedAt] = useState<number | null>(null);
+  const roleRequestId = useRef(0);
 
   const loadRole = async (activeSession: Session | null) => {
+    const requestId = ++roleRequestId.current;
     const userId = activeSession?.user?.id;
     if (!userId || !activeSession.access_token) {
-      setRole(null);
+      if (requestId === roleRequestId.current) setRole(null);
       return;
     }
 
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
     if (!supabaseUrl || !publishableKey) {
-      setRole(null);
+      if (requestId === roleRequestId.current) setRole(null);
       return;
     }
 
     const roles = (Object.keys(RANK) as AppRole[]).sort((a, b) => RANK[b] - RANK[a]);
-    for (const candidate of roles) {
-      try {
-        // Envia explicitamente o JWT da sessão. Isso evita que a consulta de
-        // permissão seja executada como `anon` durante a hidratação inicial.
-        const response = await fetch(`${supabaseUrl}/rest/v1/rpc/has_role`, {
-          method: "POST",
-          headers: {
-            apikey: publishableKey,
-            Authorization: `Bearer ${activeSession.access_token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ _user_id: userId, _role: candidate }),
-        });
-        if (response.ok && (await response.json()) === true) {
-          setRole(candidate);
-          return;
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      for (const candidate of roles) {
+        try {
+          // Envia explicitamente o JWT da sessão. Isso evita que a consulta de
+          // permissão seja executada como `anon` durante a hidratação inicial.
+          const response = await fetch(`${supabaseUrl}/rest/v1/rpc/has_role`, {
+            method: "POST",
+            headers: {
+              apikey: publishableKey,
+              Authorization: `Bearer ${activeSession.access_token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ _user_id: userId, _role: candidate }),
+          });
+          if (response.ok && (await response.json()) === true) {
+            if (requestId === roleRequestId.current) setRole(candidate);
+            return;
+          }
+        } catch {
+          // A instalação local pode ainda estar iniciando; tenta novamente.
         }
-      } catch {
-        // Tenta a próxima função; a ausência de papel é tratada abaixo.
       }
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
     }
-    setRole(null);
+    if (requestId === roleRequestId.current) setRole(null);
   };
 
   useEffect(() => {
@@ -94,13 +99,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSessionStartedAt(null);
         }
       }
-      // defer to avoid deadlock
+      // INITIAL_SESSION já cobre a restauração inicial sem criar uma segunda
+      // consulta concorrente com getSession().
       setTimeout(() => loadRole(s), 0);
     });
     supabase.auth.getSession().then(({ data }) => {
       setSession(data.session);
       setLoading(false);
-      loadRole(data.session);
       if (typeof window !== "undefined" && data.session) {
         const existing = localStorage.getItem(SESSION_START_KEY);
         if (!existing) {
