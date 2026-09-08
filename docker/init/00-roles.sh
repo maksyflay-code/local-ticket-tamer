@@ -89,6 +89,15 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA extensions;
 CREATE EXTENSION IF NOT EXISTS pgjwt WITH SCHEMA extensions;
 
+-- O serviço de storage entra como supabase_storage_admin e depois faz SET ROLE
+-- para anon/authenticated. O search_path do login precisa incluir o schema
+-- storage, senão as consultas falham com relation "objects" does not exist.
+ALTER ROLE supabase_storage_admin IN DATABASE postgres SET search_path TO storage, public, extensions;
+GRANT USAGE ON SCHEMA storage TO anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA storage TO anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA storage TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA storage GRANT ALL ON TABLES TO anon, authenticated, service_role;
+
 ALTER ROLE supabase_realtime_admin IN DATABASE postgres SET search_path TO _realtime, public;
 GRANT ALL ON SCHEMA _realtime TO supabase_admin, supabase_realtime_admin;
 GRANT ALL ON SCHEMA realtime TO supabase_admin, supabase_realtime_admin;
