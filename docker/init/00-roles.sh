@@ -69,6 +69,8 @@ ALTER ROLE dashboard_user WITH CREATEROLE CREATEDB REPLICATION;
 
 GRANT anon, authenticated, service_role TO authenticator;
 GRANT anon, authenticated, service_role TO supabase_admin;
+-- O serviço de storage assume o papel do usuário (SET ROLE) para aplicar RLS.
+GRANT anon, authenticated, service_role TO supabase_storage_admin;
 GRANT ALL ON DATABASE postgres TO supabase_auth_admin, supabase_storage_admin, supabase_realtime_admin;
 
 -- ---------- schemas ----------
