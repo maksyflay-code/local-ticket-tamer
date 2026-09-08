@@ -64,26 +64,32 @@ for arquivo in "${ARQUIVOS[@]}"; do
   echo "  - $tabela: $total registro(s) no total."
 done
 
-# Reajusta contadores automáticos das tabelas importadas.
+# Reajusta contadores automáticos com base no maior valor já existente em cada coluna.
 psql_exec <<'SQL' > /dev/null
 DO $$
 DECLARE
-  s record;
+  r record;
+  seq text;
+  maxv bigint;
 BEGIN
-  FOR s IN
-    SELECT sequence_schema, sequence_name FROM information_schema.sequences
-    WHERE sequence_schema = 'public'
+  FOR r IN
+    SELECT c.table_name, c.column_name
+      FROM information_schema.columns c
+      JOIN information_schema.tables t
+        ON t.table_schema = c.table_schema AND t.table_name = c.table_name
+     WHERE c.table_schema = 'public' AND t.table_type = 'BASE TABLE'
   LOOP
-    EXECUTE format(
-      'SELECT setval(%L, coalesce((SELECT last_value FROM %I.%I), 1))',
-      format('%I.%I', s.sequence_schema, s.sequence_name),
-      s.sequence_schema, s.sequence_name
-    );
+    seq := pg_get_serial_sequence(format('public.%I', r.table_name), r.column_name);
+    CONTINUE WHEN seq IS NULL;
+    EXECUTE format('SELECT coalesce(max(%I), 0) FROM public.%I', r.column_name, r.table_name)
+      INTO maxv;
+    PERFORM setval(seq, GREATEST(maxv, 1), maxv > 0);
   END LOOP;
 END
 $$;
 NOTIFY pgrst, 'reload schema';
 SQL
+
 
 bash "$ROOT/scripts/corrigir-contas.sh" >/dev/null 2>&1 || true
 
