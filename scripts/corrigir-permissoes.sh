@@ -15,6 +15,10 @@ echo "Aplicando permissões..."
 ALTER ROLE service_role WITH BYPASSRLS;
 ALTER ROLE supabase_admin WITH BYPASSRLS;
 
+-- O serviço de arquivos precisa assumir o papel do usuário (SET ROLE) para
+-- avaliar as políticas de acesso; sem isso qualquer download falha.
+GRANT anon, authenticated, service_role TO supabase_storage_admin;
+
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT USAGE ON SCHEMA extensions TO anon, authenticated, service_role;
 
