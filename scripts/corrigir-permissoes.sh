@@ -18,6 +18,14 @@ ALTER ROLE supabase_admin WITH BYPASSRLS;
 -- O serviço de arquivos precisa assumir o papel do usuário (SET ROLE) para
 -- avaliar as políticas de acesso; sem isso qualquer download falha.
 GRANT anon, authenticated, service_role TO supabase_storage_admin;
+-- O serviço de storage entra como supabase_storage_admin e depois faz SET ROLE
+-- para anon/authenticated. O search_path do login precisa incluir o schema
+-- storage, senão as consultas falham com relation "objects" does not exist.
+ALTER ROLE supabase_storage_admin IN DATABASE postgres SET search_path TO storage, public, extensions;
+GRANT USAGE ON SCHEMA storage TO anon, authenticated, service_role;
+GRANT ALL ON ALL TABLES IN SCHEMA storage TO anon, authenticated, service_role;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA storage TO anon, authenticated, service_role;
+ALTER DEFAULT PRIVILEGES IN SCHEMA storage GRANT ALL ON TABLES TO anon, authenticated, service_role;
 
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT USAGE ON SCHEMA extensions TO anon, authenticated, service_role;
