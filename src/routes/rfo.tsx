@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { requireAuth } from "@/lib/guard";
 import { useAuth } from "@/lib/auth";
@@ -12,6 +12,16 @@ import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/rfo")({
   beforeLoad: requireAuth,
+  head: () => ({
+    meta: [
+      { title: "Gerar RFO | IVI Telecom" },
+      { name: "description", content: "Gere relatórios RFO a partir dos chamados registrados." },
+      { property: "og:title", content: "Gerar RFO | IVI Telecom" },
+      { property: "og:description", content: "Gere relatórios RFO a partir dos chamados registrados." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
   component: RfoPage,
 });
 
@@ -71,6 +81,14 @@ function formatDateTimeBr(value: string): string {
   return `${d}/${m}/${y}${time ? ` ${time}` : ""}`;
 }
 
+function isoToLocalInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const offset = d.getTimezoneOffset();
+  return new Date(d.getTime() - offset * 60_000).toISOString().slice(0, 16);
+}
+
 function RfoPage() {
   const { user } = useAuth();
   const today = new Date().toISOString().slice(0, 10);
@@ -90,6 +108,55 @@ function RfoPage() {
   });
   const [fotos, setFotos] = useState<FotoItem[]>([]);
   const [generating, setGenerating] = useState(false);
+  const [buscaChamado, setBuscaChamado] = useState<"idle" | "loading" | "found" | "not-found" | "error">("idle");
+
+  useEffect(() => {
+    const digits = form.protocolo.replace(/\D/g, "");
+    if (!digits) {
+      setBuscaChamado("idle");
+      return;
+    }
+
+    const numero = Number(digits);
+    if (!Number.isSafeInteger(numero) || numero <= 0) {
+      setBuscaChamado("idle");
+      return;
+    }
+
+    let cancelled = false;
+    const timer = window.setTimeout(async () => {
+      setBuscaChamado("loading");
+      const { data, error } = await supabase
+        .from("chamados")
+        .select("numero, created_at, iniciado_at, resolvido_at, finalizado_at")
+        .eq("numero", numero)
+        .maybeSingle();
+
+      if (cancelled) return;
+      if (error) {
+        setBuscaChamado("error");
+        return;
+      }
+      if (!data) {
+        setBuscaChamado("not-found");
+        return;
+      }
+
+      const inicio = isoToLocalInput(data.iniciado_at ?? data.created_at);
+      const fim = isoToLocalInput(data.finalizado_at ?? data.resolvido_at);
+      setForm((current) => ({
+        ...current,
+        ...(inicio ? { inicio } : {}),
+        ...(fim ? { fim } : {}),
+      }));
+      setBuscaChamado("found");
+    }, 450);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [form.protocolo]);
 
   const onFotos = async (files: FileList | null) => {
     if (!files) return;
@@ -359,7 +426,20 @@ function RfoPage() {
               <input value={form.cliente} onChange={(e) => setF("cliente", e.target.value)} className={inputCls} />
             </Field>
             <Field label="Protocolo interno">
-              <input value={form.protocolo} onChange={(e) => setF("protocolo", e.target.value)} placeholder="Ex: #1234 / CHM-000123" className={inputCls} />
+              <input
+                value={form.protocolo}
+                onChange={(e) => setF("protocolo", e.target.value)}
+                placeholder="Ex: #1234 / CHM-000123"
+                className={inputCls}
+              />
+              {buscaChamado !== "idle" && (
+                <p className={`mt-1.5 text-xs ${buscaChamado === "found" ? "text-emerald-400" : buscaChamado === "loading" ? "text-muted-foreground" : "text-destructive"}`}>
+                  {buscaChamado === "loading" && "Buscando chamado…"}
+                  {buscaChamado === "found" && "Chamado encontrado. Datas preenchidas automaticamente."}
+                  {buscaChamado === "not-found" && "Chamado não encontrado."}
+                  {buscaChamado === "error" && "Não foi possível buscar o chamado."}
+                </p>
+              )}
             </Field>
             <Field label="Data do RFO">
               <input type="date" value={form.data} onChange={(e) => setF("data", e.target.value)} className={inputCls} />
