@@ -111,14 +111,8 @@ function RfoPage() {
   const [buscaChamado, setBuscaChamado] = useState<"idle" | "loading" | "found" | "not-found" | "error">("idle");
 
   useEffect(() => {
-    const digits = form.protocolo.replace(/\D/g, "");
-    if (!digits) {
-      setBuscaChamado("idle");
-      return;
-    }
-
-    const numero = Number(digits);
-    if (!Number.isSafeInteger(numero) || numero <= 0) {
+    const protocolo = form.protocolo.trim().toUpperCase();
+    if (!protocolo) {
       setBuscaChamado("idle");
       return;
     }
@@ -126,11 +120,26 @@ function RfoPage() {
     let cancelled = false;
     const timer = window.setTimeout(async () => {
       setBuscaChamado("loading");
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from("chamados")
-        .select("numero, created_at, iniciado_at, resolvido_at, finalizado_at")
-        .eq("numero", numero)
+        .select("numero, codigo, created_at, iniciado_at, resolvido_at, finalizado_at")
+        .ilike("codigo", protocolo)
         .maybeSingle();
+
+      // Também aceita o número sequencial: 1234, #1234, TK-1234 ou CHM-000123.
+      if (!error && !data) {
+        const numeroTexto = protocolo.match(/^(?:#?(?:TK|CHM)-?)?(\d+)$/)?.[1];
+        const numero = numeroTexto ? Number(numeroTexto) : Number.NaN;
+        if (Number.isSafeInteger(numero) && numero > 0) {
+          const numeroResult = await supabase
+            .from("chamados")
+            .select("numero, codigo, created_at, iniciado_at, resolvido_at, finalizado_at")
+            .eq("numero", numero)
+            .maybeSingle();
+          data = numeroResult.data;
+          error = numeroResult.error;
+        }
+      }
 
       if (cancelled) return;
       if (error) {
