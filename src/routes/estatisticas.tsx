@@ -452,8 +452,8 @@ function EstatisticasPage() {
           />
         </div>
 
-        {/* KPIs — MTTR / TTFR / Uptime com comparativo */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* KPIs — MTTR / Uptime com comparativo */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <KpiCompare
             icon={Timer}
             label="MTTR"
@@ -464,17 +464,6 @@ function EstatisticasPage() {
             lowerIsBetter
             loading={loading}
             tone="indigo"
-          />
-          <KpiCompare
-            icon={Zap}
-            label="TTFR"
-            hint="Tempo até primeiro atendimento"
-            value={mttrTtfr.ttfr}
-            prev={prevMttrTtfr.ttfr}
-            format={fmtHours}
-            lowerIsBetter
-            loading={loading}
-            tone="amber"
           />
           <KpiCompare
             icon={Wifi}
