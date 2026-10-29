@@ -8,7 +8,7 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, AreaChart, Area,
 } from "recharts";
-import { Activity, AlertTriangle, CheckCircle2, Users, Ticket, Wifi, TrendingUp, Printer, Timer, Zap, ArrowDown, ArrowUp, Minus } from "lucide-react";
+import { Activity, AlertTriangle, CheckCircle2, Users, Ticket, Wifi, TrendingUp, Printer, Timer, ArrowDown, ArrowUp, Minus } from "lucide-react";
 import { downtimeByCliente, totalDowntime, uptimePct, fmtUptime, fmtDowntime, isNonDowntimeTipo, type ChamadoUptime } from "@/lib/uptime";
 
 export const Route = createFileRoute("/estatisticas")({
