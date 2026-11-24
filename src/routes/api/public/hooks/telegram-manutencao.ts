@@ -86,7 +86,8 @@ export const Route = createFileRoute('/api/public/hooks/telegram-manutencao')({
           }
 
           // Início
-          if (!m.notificado_inicio_at && now >= inicio) {
+          // Não reenviar manutenções antigas/importadas: só avisa até 2h após o início.
+          if (!m.notificado_inicio_at && now >= inicio && now.getTime() - inicio.getTime() < 2 * 60 * 60_000) {
             const txt =
               `🔧 <b>Manutenção iniciada agora</b>\n` +
               `📡 <b>Operadora:</b> ${esc(m.operadora)}\n` +
