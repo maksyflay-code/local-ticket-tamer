@@ -184,6 +184,14 @@ services:
       TELEGRAM_API_KEY: ${TELEGRAM_API_KEY}
       LOVABLE_API_KEY: ${LOVABLE_API_KEY}
 
+  agendador:
+    image: curlimages/curl:8.10.1
+    container_name: ivi-agendador
+    restart: unless-stopped
+    depends_on:
+      - app
+    entrypoint: ["sh", "-c", "while true; do curl -s -m 30 -X POST http://app:3000/api/public/hooks/telegram-manutencao; echo; sleep 60; done"]
+
   gateway:
     image: nginx:1.27-alpine
     container_name: ivi-gateway
