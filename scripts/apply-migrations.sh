@@ -54,22 +54,28 @@ SQL
 
 shopt -s nullglob
 files=("$ROOT"/supabase/migrations/*.sql "$ROOT"/docker/migrations/*.sql)
-while IFS= read -r entry; do
+# Docker exec -T encaminha stdin, inclusive em consultas psql -c.
+# Leia a lista em um descritor separado para não perder as próximas migrações.
+while IFS= read -r -u 3 entry; do
   f="${entry#*|}"
   name="$(basename "$f")"
-  applied="$("${PSQL[@]}" -tAc "SELECT 1 FROM public._migracoes_aplicadas WHERE nome = '$name'")"
+  applied="$("${PSQL[@]}" -tAc "SELECT 1 FROM public._migracoes_aplicadas WHERE nome = '$name'" </dev/null)"
   if [ "$applied" = "1" ]; then
     echo "   - $name (já aplicada)"
     continue
   fi
   echo "   + $name"
   { cat "$f"; printf '\nINSERT INTO public._migracoes_aplicadas (nome) VALUES (\x27%s\x27);\n' "$name"; } | "${PSQL[@]}" --single-transaction >/dev/null
-done < <(for f in "${files[@]}"; do printf '%s|%s\n' "$(basename "$f")" "$f"; done | sort)
-
-echo "Migrações concluídas."
+done 3< <(for f in "${files[@]}"; do printf '%s|%s\n' "$(basename "$f")" "$f"; done | sort)
 
 # Libera o acesso da API de dados às tabelas criadas (necessário no ambiente local)
 "${PSQL[@]}" >/dev/null <<'SQL'
+DO $$ BEGIN
+  IF to_regclass('public.estoque_itens') IS NULL OR to_regclass('public.estoque_movimentos') IS NULL
+     OR to_regprocedure('public.registrar_materiais_os(uuid,uuid,jsonb,text)') IS NULL THEN
+    RAISE EXCEPTION 'Atualização incompleta: estoque e materiais da OS não foram instalados';
+  END IF;
+END $$;
 GRANT USAGE ON SCHEMA public TO anon, authenticated, service_role;
 GRANT USAGE ON SCHEMA extensions TO anon, authenticated, service_role;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO authenticated;
@@ -83,15 +89,10 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon, au
 REVOKE UPDATE, DELETE ON public.estoque_movimentos FROM authenticated;
 REVOKE ALL ON FUNCTION public.registrar_materiais_os(uuid, uuid, jsonb, text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.registrar_materiais_os(uuid, uuid, jsonb, text) TO authenticated;
-DO $$ BEGIN
-  IF to_regclass('public.estoque_itens') IS NULL OR to_regclass('public.estoque_movimentos') IS NULL
-     OR to_regprocedure('public.registrar_materiais_os(uuid,uuid,jsonb,text)') IS NULL THEN
-    RAISE EXCEPTION 'Atualização incompleta: estoque e materiais da OS não foram instalados';
-  END IF;
-END $$;
 NOTIFY pgrst, 'reload schema';
 SQL
 
+echo "Migrações concluídas: estoque e materiais da OS instalados."
 echo "Permissões da API de dados aplicadas."
 
 # O PostgREST pode ter iniciado antes das tabelas e funções das migrações.

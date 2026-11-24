@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 - Keep new VM-only database changes in docker/migrations and apply both migration directories in timestamp order with scripts/atualizar-vm.sh; the local VM is the database authority.
+- Read migration lists on a dedicated file descriptor and give psql lookup commands an empty stdin; Docker exec forwards stdin and otherwise drains pending migration filenames.
 - Represent B2B work orders in solicitacoes with structured dados and cliente_id; this preserves the existing request lifecycle and history.
 - Record OS material consumption through registrar_materiais_os with a session-derived owner, row locks and an idempotency UUID; stock and audit records must commit together.
 - Test inventory SQL in isolated PGlite with auth/RLS fixtures; this validates rules without accessing the user's VM.

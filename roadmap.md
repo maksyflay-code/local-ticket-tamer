@@ -3,3 +3,4 @@
 - [x] Vincular materiais utilizados à OS, com baixa segura e histórico.
 - [x] Validar regras em testes SQL isolados e fornecer comando de atualização.
 - [ ] Validar abertura de OS e baixa com usuário real na VM — sem acesso ao banco e à sessão da VM.
+- [x] Corrigir a execução interrompida das migrações e validar a regressão com Docker simulado.
