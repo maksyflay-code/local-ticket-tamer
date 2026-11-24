@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Users, Ticket, BarChart3, LogOut, Package, UserCog, UserCircle, ShieldCheck, Shield, Eye, Server, Menu, FileText, Clock, Bell, Network, FolderArchive, ClipboardList, PieChart, Wrench } from "lucide-react";
+import { LayoutDashboard, Users, Ticket, BarChart3, LogOut, Package, UserCog, UserCircle, ShieldCheck, Shield, Eye, Server, Menu, FileText, Clock, Bell, Network, FolderArchive, ClipboardList, PieChart, Wrench, Boxes } from "lucide-react";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { SessionExpiryWarning } from "@/components/SessionExpiryWarning";
 import logo from "@/assets/ivi-logo.jpeg";
@@ -15,6 +15,7 @@ const nav = [
   { to: "/chamados", label: "Chamados", icon: Ticket },
   { to: "/planos", label: "Planos", icon: Package },
   { to: "/equipamentos", label: "Equipamentos", icon: Server },
+  { to: "/estoque", label: "Estoque", icon: Boxes },
   { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
   { to: "/estatisticas", label: "Estatísticas", icon: PieChart },
   { to: "/rfo", label: "Gerar RFO", icon: FileText },

@@ -16,6 +16,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as DocumentosRouteImport } from './routes/documentos'
 import { Route as EquipamentosRouteImport } from './routes/equipamentos'
 import { Route as EstatisticasRouteImport } from './routes/estatisticas'
+import { Route as EstoqueRouteImport } from './routes/estoque'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ManutencoesRouteImport } from './routes/manutencoes'
 import { Route as NotificacoesRouteImport } from './routes/notificacoes'
@@ -65,6 +66,11 @@ const EquipamentosRoute = EquipamentosRouteImport.update({
 const EstatisticasRoute = EstatisticasRouteImport.update({
   id: '/estatisticas',
   path: '/estatisticas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EstoqueRoute = EstoqueRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -153,6 +159,7 @@ export interface FileRoutesByFullPath {
   '/documentos': typeof DocumentosRoute
   '/equipamentos': typeof EquipamentosRoute
   '/estatisticas': typeof EstatisticasRoute
+  '/estoque': typeof EstoqueRoute
   '/login': typeof LoginRoute
   '/manutencoes': typeof ManutencoesRoute
   '/notificacoes': typeof NotificacoesRouteWithChildren
@@ -177,6 +184,7 @@ export interface FileRoutesByTo {
   '/documentos': typeof DocumentosRoute
   '/equipamentos': typeof EquipamentosRoute
   '/estatisticas': typeof EstatisticasRoute
+  '/estoque': typeof EstoqueRoute
   '/login': typeof LoginRoute
   '/manutencoes': typeof ManutencoesRoute
   '/notificacoes': typeof NotificacoesRouteWithChildren
@@ -202,6 +210,7 @@ export interface FileRoutesById {
   '/documentos': typeof DocumentosRoute
   '/equipamentos': typeof EquipamentosRoute
   '/estatisticas': typeof EstatisticasRoute
+  '/estoque': typeof EstoqueRoute
   '/login': typeof LoginRoute
   '/manutencoes': typeof ManutencoesRoute
   '/notificacoes': typeof NotificacoesRouteWithChildren
@@ -228,6 +237,7 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/equipamentos'
     | '/estatisticas'
+    | '/estoque'
     | '/login'
     | '/manutencoes'
     | '/notificacoes'
@@ -252,6 +262,7 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/equipamentos'
     | '/estatisticas'
+    | '/estoque'
     | '/login'
     | '/manutencoes'
     | '/notificacoes'
@@ -276,6 +287,7 @@ export interface FileRouteTypes {
     | '/documentos'
     | '/equipamentos'
     | '/estatisticas'
+    | '/estoque'
     | '/login'
     | '/manutencoes'
     | '/notificacoes'
@@ -301,6 +313,7 @@ export interface RootRouteChildren {
   DocumentosRoute: typeof DocumentosRoute
   EquipamentosRoute: typeof EquipamentosRoute
   EstatisticasRoute: typeof EstatisticasRoute
+  EstoqueRoute: typeof EstoqueRoute
   LoginRoute: typeof LoginRoute
   ManutencoesRoute: typeof ManutencoesRoute
   NotificacoesRoute: typeof NotificacoesRouteWithChildren
@@ -366,6 +379,13 @@ declare module '@tanstack/react-router' {
       path: '/estatisticas'
       fullPath: '/estatisticas'
       preLoaderRoute: typeof EstatisticasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estoque': {
+      id: '/estoque'
+      path: '/estoque'
+      fullPath: '/estoque'
+      preLoaderRoute: typeof EstoqueRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -496,6 +516,7 @@ const rootRouteChildren: RootRouteChildren = {
   DocumentosRoute: DocumentosRoute,
   EquipamentosRoute: EquipamentosRoute,
   EstatisticasRoute: EstatisticasRoute,
+  EstoqueRoute: EstoqueRoute,
   LoginRoute: LoginRoute,
   ManutencoesRoute: ManutencoesRoute,
   NotificacoesRoute: NotificacoesRouteWithChildren,
