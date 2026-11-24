@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import { ShieldCheck, Shield, Eye, KeyRound, Mail, User } from "lucide-react";
 
 export const Route = createFileRoute("/perfil")({
+  head: () => pageHead("Meu perfil", "Dados de acesso e perfil do usuário do ERP IVI Telecom."),
   beforeLoad: requireAuth,
   component: PerfilPage,
 });

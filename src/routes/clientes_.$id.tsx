@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -11,6 +12,7 @@ import { pingHost } from "@/lib/ping.functions";
 import { PingResult, type PingResultData } from "@/components/PingResult";
 
 export const Route = createFileRoute("/clientes_/$id")({
+  head: () => pageHead("Detalhes do cliente", "Circuitos, contatos e histórico de atendimento do cliente IVI Telecom."),
   beforeLoad: requireAuth,
   component: ClienteDetailPage,
 });

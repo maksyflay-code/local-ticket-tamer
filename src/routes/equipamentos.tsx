@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -10,6 +11,7 @@ import { pingHost } from "@/lib/ping.functions";
 import { PingResult, type PingResultData } from "@/components/PingResult";
 
 export const Route = createFileRoute("/equipamentos")({
+  head: () => pageHead("Equipamentos de rede", "Cadastro e acompanhamento dos equipamentos e POPs da IVI Telecom."),
   beforeLoad: requireAuth,
   component: EquipamentosPage,
 });

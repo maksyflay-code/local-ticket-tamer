@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -21,6 +22,7 @@ import {
 } from "@/lib/push-client";
 
 export const Route = createFileRoute("/notificacoes/preferencias")({
+  head: () => pageHead("Preferências de notificações", "Preferências de avisos de atendimento e operações da IVI Telecom."),
   beforeLoad: requireAuth,
   component: PreferenciasPage,
 });

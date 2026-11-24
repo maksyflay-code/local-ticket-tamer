@@ -8,12 +8,12 @@ cd "$ROOT/docker"
 # Carrega POSTGRES_PASSWORD do .env e passa ao psql sem pedir no teclado
 set -a; . ./.env; set +a
 
-PSQL=(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db psql -v ON_ERROR_STOP=1 -U supabase_admin -d postgres)
+PSQL=(docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db psql --no-password -h 127.0.0.1 -v ON_ERROR_STOP=1 -U supabase_admin -d postgres)
 
 # Atualiza as funções que extraem a identidade da sessão. O PostgREST atual
 # envia os dados em request.jwt.claims; versões antigas usavam campos separados.
 docker compose exec -T -e PGPASSWORD="$POSTGRES_PASSWORD" db \
-  psql -v ON_ERROR_STOP=1 -U supabase_auth_admin -d postgres \
+  psql --no-password -h 127.0.0.1 -v ON_ERROR_STOP=1 -U supabase_auth_admin -d postgres \
   < "$ROOT/docker/init/01-auth-functions.sql" >/dev/null
 
 # Garante que funcoes como crypt()/gen_salt() fiquem visiveis nas migracoes
@@ -32,7 +32,7 @@ END
 $$;
 SQL
 
-"${PSQL[@]}" -c "CREATE TABLE IF NOT EXISTS public._migracoes_aplicadas (nome text primary key, aplicada_em timestamptz default now());" >/dev/null
+"${PSQL[@]}" -c "CREATE TABLE IF NOT EXISTS public._migracoes_aplicadas (nome text primary key, aplicada_em timestamptz default now()); GRANT ALL ON public._migracoes_aplicadas TO service_role;" >/dev/null
 
 # Garante a tabela usada pelo serviço de tempo real (algumas migrações criam políticas nela)
 "${PSQL[@]}" >/dev/null <<'SQL'
@@ -52,7 +52,10 @@ GRANT USAGE ON SCHEMA realtime TO authenticated;
 GRANT SELECT ON realtime.messages TO authenticated;
 SQL
 
-for f in "$ROOT"/supabase/migrations/*.sql; do
+shopt -s nullglob
+files=("$ROOT"/supabase/migrations/*.sql "$ROOT"/docker/migrations/*.sql)
+while IFS= read -r entry; do
+  f="${entry#*|}"
   name="$(basename "$f")"
   applied="$("${PSQL[@]}" -tAc "SELECT 1 FROM public._migracoes_aplicadas WHERE nome = '$name'")"
   if [ "$applied" = "1" ]; then
@@ -60,9 +63,8 @@ for f in "$ROOT"/supabase/migrations/*.sql; do
     continue
   fi
   echo "   + $name"
-  "${PSQL[@]}" < "$f" >/dev/null
-  "${PSQL[@]}" -c "INSERT INTO public._migracoes_aplicadas (nome) VALUES ('$name');" >/dev/null
-done
+  { cat "$f"; printf '\nINSERT INTO public._migracoes_aplicadas (nome) VALUES (\x27%s\x27);\n' "$name"; } | "${PSQL[@]}" --single-transaction >/dev/null
+done < <(for f in "${files[@]}"; do printf '%s|%s\n' "$(basename "$f")" "$f"; done | sort)
 
 echo "Migrações concluídas."
 
@@ -78,6 +80,15 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO authenticated, service_role;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT EXECUTE ON FUNCTIONS TO anon, authenticated, service_role;
+REVOKE UPDATE, DELETE ON public.estoque_movimentos FROM authenticated;
+REVOKE ALL ON FUNCTION public.registrar_materiais_os(uuid, uuid, jsonb, text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.registrar_materiais_os(uuid, uuid, jsonb, text) TO authenticated;
+DO $$ BEGIN
+  IF to_regclass('public.estoque_itens') IS NULL OR to_regclass('public.estoque_movimentos') IS NULL
+     OR to_regprocedure('public.registrar_materiais_os(uuid,uuid,jsonb,text)') IS NULL THEN
+    RAISE EXCEPTION 'Atualização incompleta: estoque e materiais da OS não foram instalados';
+  END IF;
+END $$;
 NOTIFY pgrst, 'reload schema';
 SQL
 

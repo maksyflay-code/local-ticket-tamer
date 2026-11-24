@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState, Fragment } from "react";
 import { QueryClient, QueryClientProvider, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -18,6 +19,7 @@ import {
 } from "recharts";
 
 export const Route = createFileRoute("/dashboard")({
+  head: () => pageHead("Painel operacional", "Indicadores e acompanhamento das operações de rede da IVI Telecom."),
   beforeLoad: requireAuth,
   component: DashboardRoute,
 });

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -9,6 +10,7 @@ import { invalidateSlaCache, type Prioridade } from "@/lib/sla";
 import { Clock, Save, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/configuracoes/sla")({
+  head: () => pageHead("Configuração de SLA", "Prazos de atendimento e resolução por prioridade na IVI Telecom."),
   beforeLoad: requireAuth,
   component: SlaConfigPage,
 });

@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
+import { MateriaisOS } from "@/components/MateriaisOS";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import { authHeaders } from "@/lib/server-call";
 import {
   TIPOS,
   TIPOS_MAP,
+  TIPOS_B2B,
   STATUS_META,
   CAMPOS_POR_TIPO,
   defaultTituloForTipo,
@@ -84,6 +86,13 @@ function fmt(d: string | null) {
 }
 
 export const Route = createFileRoute("/solicitacoes")({
+  head: () => ({ meta: [
+    { title: "Solicitações e OS B2B — IVI Telecom" },
+    { name: "description", content: "Ordens de serviço para provedores, circuitos e consumo de materiais da IVI Telecom." },
+    { property: "og:title", content: "Solicitações e OS B2B — IVI Telecom" },
+    { property: "og:description", content: "Ativações, backbone, BGP, PTT, colocation e proteção DDoS." },
+    { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
+  ] }),
   component: SolicitacoesPage,
 });
 
@@ -314,7 +323,7 @@ function SolicitacoesPage() {
             <DialogTitle>Nova solicitação</DialogTitle>
             <DialogDescription>Escolha o tipo de solicitação a criar.</DialogDescription>
           </DialogHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[70vh] overflow-y-auto">
             {TIPOS.map((t) => {
               const Icon = t.icon;
               return (
@@ -389,6 +398,8 @@ function CriarSolicitacaoModal({
   const [descricao, setDescricao] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [responsavelId, setResponsavelId] = useState<string>("");
+  const [clienteId, setClienteId] = useState("");
+  const [clientes, setClientes] = useState<{ id: string; nome: string }[]>([]);
   const [operadores, setOperadores] = useState<
     { id: string; email: string; name: string | null }[]
   >([]);
@@ -399,6 +410,18 @@ function CriarSolicitacaoModal({
     setTitulo("");
     setDescricao("");
     setResponsavelId("");
+    setClienteId("");
+  }, [tipo]);
+
+  useEffect(() => {
+    if (!tipo) return;
+    let active = true;
+    void supabase.from("clientes").select("id,nome").order("nome").then(({ data, error }) => {
+      if (!active) return;
+      if (error) toast.error("Não foi possível carregar os provedores", { description: error.message });
+      setClientes(data ?? []);
+    });
+    return () => { active = false; };
   }, [tipo]);
 
   useEffect(() => {
@@ -433,6 +456,8 @@ function CriarSolicitacaoModal({
     setDados((d) => ({ ...d, [name]: value }));
 
   async function submit() {
+    if (!tipo || !userId || submitting) return;
+    if (TIPOS_B2B.includes(tipo) && !clienteId) return toast.error("Selecione o provedor cliente");
     // valida required
     for (const c of campos) {
       if (c.required && !(dados[c.name] ?? "").trim()) {
@@ -441,20 +466,23 @@ function CriarSolicitacaoModal({
       }
     }
     setSubmitting(true);
-    const tit = titulo.trim() || defaultTituloForTipo(tipo!, dados);
+    const cliente = clientes.find((c) => c.id === clienteId);
+    const dadosComCliente = { ...dados, ...(cliente ? { cliente_nome: cliente.nome } : {}) };
+    const tit = titulo.trim() || defaultTituloForTipo(tipo, dadosComCliente);
     const resp = operadores.find((o) => o.id === responsavelId);
     const respNome = resp ? resp.name || resp.email : null;
     const { data, error } = await supabase
       .from("solicitacoes")
       .insert({
-        tipo: tipo!,
+        tipo,
+        cliente_id: clienteId || null,
         titulo: tit,
         descricao: descricao.trim() || null,
         solicitante_id: userId,
         solicitante_email: userEmail,
         responsavel_id: resp ? resp.id : null,
         responsavel_nome: respNome,
-        dados: dados as never,
+        dados: dadosComCliente as never,
       } as never)
       .select("*")
       .single();
@@ -478,6 +506,13 @@ function CriarSolicitacaoModal({
         </DialogHeader>
 
         <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="provedor-cliente">Provedor cliente{TIPOS_B2B.includes(tipo) ? " *" : ""}</Label>
+            <Select value={clienteId || "nenhum"} onValueChange={(v) => setClienteId(v === "nenhum" ? "" : v)}>
+              <SelectTrigger id="provedor-cliente"><SelectValue placeholder="Selecionar provedor" /></SelectTrigger>
+              <SelectContent><SelectItem value="nenhum">Selecionar provedor</SelectItem>{clientes.map((c) => <SelectItem key={c.id} value={c.id}>{c.nome}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="titulo">Título</Label>
             <Input
@@ -634,6 +669,7 @@ function DetalheModal({
   const [historico, setHistorico] = useState<HistoricoItem[]>([]);
   const [comentario, setComentario] = useState("");
   const [busy, setBusy] = useState(false);
+  const [historicoVersion, setHistoricoVersion] = useState(0);
 
   useEffect(() => {
     if (!item) {
@@ -653,7 +689,7 @@ function DetalheModal({
     return () => {
       active = false;
     };
-  }, [item]);
+  }, [item, historicoVersion]);
 
   if (!item) return null;
 
@@ -737,6 +773,7 @@ function DetalheModal({
         <div className="rounded-md border border-border bg-secondary/30 p-3">
           <div className="text-[10px] uppercase font-mono text-muted-foreground mb-2">Dados</div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+            {typeof item.dados?.cliente_nome === "string" && <div><div className="text-[11px] text-muted-foreground">Provedor cliente</div><div>{item.dados.cliente_nome}</div></div>}
             {campos.map((c) => {
               const v = item.dados?.[c.name];
               if (v == null || v === "") return null;
@@ -755,6 +792,8 @@ function DetalheModal({
             </div>
           )}
         </div>
+
+        <MateriaisOS key={item.id} solicitacaoId={item.id} editavel={canWrite && !finalizada && !busy} onRegistrado={() => { setHistoricoVersion((v) => v + 1); onChanged(); }} />
 
         {/* Ações */}
         {canWrite && !finalizada && (

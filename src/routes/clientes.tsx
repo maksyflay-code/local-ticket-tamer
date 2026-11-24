@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -8,6 +9,7 @@ import { toast } from "sonner";
 import { monthWindow, downtimeByCliente, uptimePct, fmtUptime, isNonDowntimeTipo, type ChamadoUptime } from "@/lib/uptime";
 
 export const Route = createFileRoute("/clientes")({
+  head: () => pageHead("Provedores e clientes", "Cadastro e acompanhamento dos clientes da IVI Telecom."),
   beforeLoad: requireAuth,
   component: ClientesPage,
 });

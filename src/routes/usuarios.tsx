@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -16,6 +17,7 @@ import {
 import { authHeaders } from "@/lib/server-call";
 
 export const Route = createFileRoute("/usuarios")({
+  head: () => pageHead("Usuários", "Administração dos usuários e permissões do ERP IVI Telecom."),
   beforeLoad: requireAdmin,
   component: UsuariosPage,
 });

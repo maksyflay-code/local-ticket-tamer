@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -21,6 +22,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/notificacoes")({
+  head: () => pageHead("Notificações", "Acompanhamento de atualizações e eventos operacionais da IVI Telecom."),
   beforeLoad: requireAuth,
   component: NotificacoesPage,
 });

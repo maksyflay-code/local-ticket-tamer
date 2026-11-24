@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
@@ -12,6 +13,7 @@ import { salvarDocumentoGerado } from "@/lib/documentos";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/transito-vtal")({
+  head: () => pageHead("Trânsito VTAL", "Solicitações de trânsito e documentação técnica da IVI Telecom."),
   component: TransitoVtalPage,
 });
 

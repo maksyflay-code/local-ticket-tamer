@@ -1,9 +1,11 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
+  head: () => pageHead("ERP de Gestão", "Sistema de gestão operacional da IVI Telecom para atendimento a provedores."),
   component: IndexRedirect,
 });
 

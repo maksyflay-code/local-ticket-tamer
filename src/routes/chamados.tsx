@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -14,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Textarea } from "@/components/ui/textarea";
 
 export const Route = createFileRoute("/chamados")({
+  head: () => pageHead("Chamados", "Gestão de incidentes, atendimentos e circuitos da IVI Telecom."),
   beforeLoad: requireAuth,
   component: ChamadosPage,
 });

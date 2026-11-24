@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -7,6 +8,7 @@ import { Plus, Search, Trash2, Pencil, Wifi } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/planos")({
+  head: () => pageHead("Planos e serviços", "Cadastro de planos e serviços de conectividade da IVI Telecom."),
   beforeLoad: requireAuth,
   component: PlanosPage,
 });

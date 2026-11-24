@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -7,6 +8,7 @@ import loginBg from "@/assets/login-bg.jpg";
 import { AlertCircle, Loader2, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
+  head: () => pageHead("Acesso ao ERP", "Acesso à gestão de operações e atendimentos da IVI Telecom."),
   beforeLoad: async () => {
     if (typeof window === "undefined") return;
     const { data } = await supabase.auth.getSession();

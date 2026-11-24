@@ -1,7 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
-import { supabase } from "@/integrations/supabase/client";
+import { estoqueDb as db } from "@/lib/estoque-client";
+import { Button } from "@/components/ui/button";
 import { requireAuth } from "@/lib/guard";
 import { useAuth } from "@/lib/auth";
 import { Plus, Minus, Pencil, PackagePlus, Trash2, AlertTriangle } from "lucide-react";
@@ -26,8 +27,6 @@ type Item = { id: string; nome: string; unidade: string; quantidade: number; min
 type Mov = { id: string; item_id: string; tipo: string; quantidade: number; observacao: string | null; created_at: string };
 type Acao = { item: Item; tipo: "entrada" | "saida" | "ajuste" } | null;
 
-const db = supabase as unknown as { from: (t: string) => any };
-
 function EstoquePage() {
   const { role } = useAuth();
   const podeEditar = role === "admin" || role === "operador";
@@ -37,24 +36,31 @@ function EstoquePage() {
   const [qtd, setQtd] = useState("");
   const [obs, setObs] = useState("");
   const [novo, setNovo] = useState({ nome: "", minimo: "0" });
+  const [erro, setErro] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [busy, setBusy] = useState(false);
 
   const load = async () => {
     const [i, m] = await Promise.all([
       db.from("estoque_itens").select("*").order("nome"),
       db.from("estoque_movimentos").select("*").order("created_at", { ascending: false }).limit(50),
     ]);
-    if (i.error) toast.error(i.error.message);
+    setErro(i.error || m.error ? "Estoque indisponível. A atualização do banco local da VM precisa ser concluída." : "");
     setItens(i.data ?? []);
     setMovs(m.data ?? []);
+    setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
   const registrar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!acao) return;
-    const n = parseInt(qtd, 10);
-    if (isNaN(n) || n < 0 || (acao.tipo !== "ajuste" && n === 0)) return toast.error("Informe uma quantidade válida");
+    if (busy) return;
+    const n = Number(qtd);
+    if (!qtd || !Number.isSafeInteger(n) || n < 0 || (acao.tipo !== "ajuste" && n === 0)) return toast.error("Informe uma quantidade válida");
+    setBusy(true);
     const { error } = await db.from("estoque_movimentos").insert({ item_id: acao.item.id, tipo: acao.tipo, quantidade: n, observacao: obs || null });
+    setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Movimento registrado");
     setAcao(null); setQtd(""); setObs(""); load();
@@ -69,7 +75,7 @@ function EstoquePage() {
   };
 
   const remover = async (it: Item) => {
-    if (!confirm(`Excluir ${it.nome} e seu histórico?`)) return;
+    if (!confirm(`Excluir ${it.nome}? Itens com movimentações não podem ser excluídos.`)) return;
     const { error } = await db.from("estoque_itens").delete().eq("id", it.id);
     if (error) return toast.error(error.message);
     load();
@@ -81,16 +87,18 @@ function EstoquePage() {
   return (
     <AppShell title="Estoque">
       <h1 className="font-display text-2xl font-bold mb-6">Estoque de materiais</h1>
+      {loading && <p className="text-sm text-muted-foreground mb-4">Carregando estoque…</p>}
+      {erro && <div role="alert" className="border border-destructive p-4 mb-6 text-sm text-destructive">{erro}<Button variant="outline" size="sm" className="ml-3" onClick={load}>Tentar novamente</Button></div>}
 
-      {podeEditar && (
+      {podeEditar && !erro && !loading && (
         <form onSubmit={criar} className="flex flex-wrap gap-2 mb-6">
           <input value={novo.nome} onChange={(e) => setNovo({ ...novo, nome: e.target.value })} placeholder="Novo item"
             className="border border-border bg-card px-3 py-2 text-sm font-mono" />
           <input type="number" min={0} value={novo.minimo} onChange={(e) => setNovo({ ...novo, minimo: e.target.value })}
             title="Estoque mínimo" className="w-28 border border-border bg-card px-3 py-2 text-sm font-mono" />
-          <button className="bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold flex items-center gap-2">
+          <Button type="submit">
             <PackagePlus className="h-4 w-4" /> Adicionar item
-          </button>
+          </Button>
         </form>
       )}
 
@@ -101,7 +109,7 @@ function EstoquePage() {
             <div key={it.id} className={`border bg-card p-4 ${baixo ? "border-destructive" : "border-border"}`}>
               <div className="flex justify-between items-start gap-2">
                 <span className="font-mono text-xs uppercase text-muted-foreground">{it.nome}</span>
-                {podeEditar && <button onClick={() => remover(it)} className="text-muted-foreground hover:text-destructive" aria-label="Excluir"><Trash2 className="h-3.5 w-3.5" /></button>}
+                {podeEditar && <Button variant="ghost" size="icon" onClick={() => remover(it)} title="Excluir item" aria-label="Excluir"><Trash2 className="h-3.5 w-3.5" /></Button>}
               </div>
               <div className="text-3xl font-bold mt-2">{it.quantidade}</div>
               <div className={`text-xs mt-1 flex items-center gap-1 ${baixo ? "text-destructive" : "text-muted-foreground"}`}>
@@ -109,9 +117,9 @@ function EstoquePage() {
               </div>
               {podeEditar && (
                 <div className="flex gap-1 mt-3">
-                  <button onClick={() => setAcao({ item: it, tipo: "entrada" })} className="flex-1 border border-border py-1 text-xs flex justify-center items-center gap-1 hover:bg-secondary"><Plus className="h-3 w-3" />Entrada</button>
-                  <button onClick={() => setAcao({ item: it, tipo: "saida" })} className="flex-1 border border-border py-1 text-xs flex justify-center items-center gap-1 hover:bg-secondary"><Minus className="h-3 w-3" />Saída</button>
-                  <button onClick={() => { setAcao({ item: it, tipo: "ajuste" }); setQtd(String(it.quantidade)); }} className="border border-border px-2 py-1 text-xs hover:bg-secondary" title="Ajustar saldo"><Pencil className="h-3 w-3" /></button>
+                  <Button size="sm" variant="outline" onClick={() => { setQtd(""); setAcao({ item: it, tipo: "entrada" }); }} className="flex-1"><Plus className="h-3 w-3" />Entrada</Button>
+                  <Button size="sm" variant="outline" onClick={() => { setQtd(""); setAcao({ item: it, tipo: "saida" }); }} className="flex-1"><Minus className="h-3 w-3" />Saída</Button>
+                  <Button size="icon" variant="outline" onClick={() => { setAcao({ item: it, tipo: "ajuste" }); setQtd(String(it.quantidade)); }} title="Ajustar saldo"><Pencil className="h-3 w-3" /></Button>
                 </div>
               )}
             </div>
@@ -149,8 +157,8 @@ function EstoquePage() {
               placeholder={acao.tipo === "ajuste" ? "Novo saldo" : "Quantidade"} className="w-full border border-border bg-background px-3 py-2 text-sm" />
             <input value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Observação (ex.: chamado, técnico)" className="w-full border border-border bg-background px-3 py-2 text-sm" />
             <div className="flex gap-2 justify-end">
-              <button type="button" onClick={() => setAcao(null)} className="px-4 py-2 text-sm border border-border">Cancelar</button>
-              <button className="px-4 py-2 text-sm bg-primary text-primary-foreground font-semibold">Salvar</button>
+              <Button type="button" variant="outline" disabled={busy} onClick={() => setAcao(null)}>Cancelar</Button>
+              <Button type="submit" disabled={busy}>Salvar</Button>
             </div>
           </form>
         </div>

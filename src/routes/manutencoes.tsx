@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -9,6 +10,7 @@ import { useAuth } from "@/lib/auth";
 import { notifyManutencaoAgendada } from "@/lib/manutencoes.functions";
 
 export const Route = createFileRoute("/manutencoes")({
+  head: () => pageHead("Manutenções programadas", "Agenda de manutenção e intervenções na rede da IVI Telecom."),
   beforeLoad: requireAuth,
   component: ManutencoesPage,
 });

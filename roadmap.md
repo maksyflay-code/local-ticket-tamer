@@ -1,0 +1,5 @@
+- [x] Preparar atualização do estoque no banco local, antes da recriação do app.
+- [x] Adicionar solicitações B2B conforme o site da IVI Telecom.
+- [x] Vincular materiais utilizados à OS, com baixa segura e histórico.
+- [x] Validar regras em testes SQL isolados e fornecer comando de atualização.
+- [ ] Validar abertura de OS e baixa com usuário real na VM — sem acesso ao banco e à sessão da VM.

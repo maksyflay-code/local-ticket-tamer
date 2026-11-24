@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -12,6 +13,7 @@ import { Activity, AlertTriangle, CheckCircle2, Users, Ticket, Wifi, TrendingUp,
 import { downtimeByCliente, totalDowntime, uptimePct, fmtUptime, fmtDowntime, isNonDowntimeTipo, type ChamadoUptime } from "@/lib/uptime";
 
 export const Route = createFileRoute("/estatisticas")({
+  head: () => pageHead("Estatísticas de atendimento", "Estatísticas de disponibilidade e atendimento da IVI Telecom."),
   beforeLoad: requireAuth,
   component: EstatisticasPage,
 });

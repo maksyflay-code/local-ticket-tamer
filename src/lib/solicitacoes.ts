@@ -18,7 +18,9 @@ export type SolicitacaoTipo =
   | "acesso"
   | "reembolso"
   | "veiculo"
-  | "cotacao";
+  | "cotacao"
+  | "ativacao" | "ampliacao" | "reparo_fibra" | "configuracao_bgp"
+  | "conexao_ptt" | "colocation" | "protecao_ddos";
 
 export type SolicitacaoStatus =
   | "aberta"
@@ -36,6 +38,13 @@ export type TipoMeta = {
 };
 
 export const TIPOS: TipoMeta[] = [
+  { value: "ativacao", label: "Ativação de circuito B2B", short: "Ativação", icon: Network, color: "text-primary", description: "Trânsito IP, transporte de dados ou link dedicado" },
+  { value: "ampliacao", label: "Ampliação de capacidade", short: "Ampliação", icon: Network, color: "text-primary", description: "Upgrade de banda e portas do provedor" },
+  { value: "reparo_fibra", label: "Reparo de fibra / backbone", short: "Reparo de fibra", icon: Wrench, color: "text-destructive", description: "Rompimento, fusão, caixas de emenda e rede óptica" },
+  { value: "configuracao_bgp", label: "Configuração BGP / IP", short: "BGP / IP", icon: Network, color: "text-primary", description: "ASN, anúncios IPv4/IPv6 e políticas de roteamento" },
+  { value: "conexao_ptt", label: "Conexão ao PTT / IX.br", short: "PTT / IX.br", icon: Network, color: "text-primary", description: "Ativação de VLAN, porta e peering no PIX" },
+  { value: "colocation", label: "Colocation / intervenção no POP", short: "Colocation", icon: Wrench, color: "text-primary", description: "Instalação de equipamento, rack e cross-connect" },
+  { value: "protecao_ddos", label: "Proteção / mitigação DDoS", short: "DDoS", icon: Network, color: "text-destructive", description: "Ativação de proteção e tratamento de ataques" },
   {
     value: "transito",
     label: "Solicitação de Trânsito",
@@ -145,7 +154,65 @@ export type CampoDef = {
 };
 
 /** Campos específicos (jsonb dados) por tipo. */
+export const TIPOS_B2B: SolicitacaoTipo[] = ["ativacao", "ampliacao", "reparo_fibra", "configuracao_bgp", "conexao_ptt", "colocation", "protecao_ddos"];
+const servicos = [
+  { value: "transito_ip", label: "Trânsito IP" }, { value: "transporte_dados", label: "Transporte de Dados" },
+  { value: "link_dedicado", label: "Link Dedicado" },
+];
+const circuito: CampoDef = { name: "circuito", label: "Circuito / contrato", type: "text", required: true };
+const contato: CampoDef = { name: "contato_tecnico", label: "Contato técnico do provedor", type: "text", required: true };
+const local: CampoDef = { name: "local", label: "POP / endereço / trecho", type: "text", required: true };
 export const CAMPOS_POR_TIPO: Record<SolicitacaoTipo, CampoDef[]> = {
+  ativacao: [
+    { name: "servico", label: "Serviço", type: "select", required: true, options: servicos }, contato,
+    { name: "origem", label: "Ponta A / POP de origem", type: "text", required: true },
+    { name: "destino", label: "Ponta B / endereço de entrega", type: "text", required: true },
+    { name: "capacidade", label: "Capacidade contratada", type: "text", required: true, placeholder: "10 Gbps" },
+    { name: "vlan", label: "VLAN / interface", type: "text" },
+    { name: "prazo", label: "Prazo de ativação", type: "date", required: true },
+  ],
+  ampliacao: [circuito, contato, local,
+    { name: "banda_atual", label: "Capacidade atual", type: "text", required: true },
+    { name: "banda_nova", label: "Nova capacidade", type: "text", required: true },
+    { name: "janela", label: "Janela de alteração", type: "datetime-local", required: true },
+  ],
+  reparo_fibra: [circuito, contato, local,
+    { name: "ocorrencia", label: "Ocorrência / chamado relacionado", type: "text", required: true },
+    { name: "impacto", label: "Circuitos e provedores afetados", type: "textarea", required: true },
+    { name: "equipe", label: "Equipe / técnico em campo", type: "text" },
+    { name: "servico_executado", label: "Serviço a executar", type: "textarea", required: true },
+  ],
+  configuracao_bgp: [circuito, contato,
+    { name: "asn", label: "ASN do provedor", type: "text", required: true },
+    { name: "prefixos", label: "Prefixos IPv4 / IPv6", type: "textarea", required: true },
+    { name: "alteracao", label: "Alteração de roteamento solicitada", type: "textarea", required: true },
+    { name: "janela", label: "Janela prevista", type: "datetime-local" },
+  ],
+  conexao_ptt: [contato,
+    { name: "asn", label: "ASN do provedor", type: "text", required: true },
+    { name: "pix", label: "PTT / PIX de destino", type: "text", required: true },
+    { name: "capacidade", label: "Capacidade da porta", type: "text", required: true },
+    { name: "vlan", label: "VLAN / cross-connect", type: "text" },
+    { name: "prazo", label: "Prazo desejado", type: "date" },
+  ],
+  colocation: [contato, local,
+    { name: "atividade", label: "Atividade", type: "select", required: true, options: [
+      { value: "instalacao", label: "Instalação" }, { value: "retirada", label: "Retirada" },
+      { value: "cross_connect", label: "Cross-connect" }, { value: "intervencao", label: "Intervenção técnica" },
+    ] },
+    { name: "rack", label: "Rack / posição / unidades U", type: "text", required: true },
+    { name: "equipamento", label: "Equipamento / serial", type: "text", required: true },
+    { name: "janela", label: "Janela de acesso", type: "datetime-local", required: true },
+  ],
+  protecao_ddos: [contato,
+    { name: "asn", label: "ASN do provedor", type: "text" },
+    { name: "prefixos", label: "Prefixos / IPs protegidos", type: "textarea", required: true },
+    { name: "acao", label: "Ação", type: "select", required: true, options: [
+      { value: "ativacao", label: "Ativar proteção" }, { value: "mitigacao", label: "Mitigar ataque" },
+      { value: "ajuste", label: "Ajustar filtros / política" },
+    ] },
+    { name: "detalhes", label: "Sintomas / tráfego / evidências", type: "textarea", required: true },
+  ],
   transito: [
     { name: "origem", label: "Origem", type: "text", required: true, placeholder: "POP / endereço de origem" },
     { name: "destino", label: "Destino", type: "text", required: true, placeholder: "POP / endereço de destino" },
@@ -234,6 +301,9 @@ export const CAMPOS_POR_TIPO: Record<SolicitacaoTipo, CampoDef[]> = {
 export function defaultTituloForTipo(tipo: SolicitacaoTipo, dados: Record<string, unknown>): string {
   const meta = TIPOS_MAP[tipo];
   switch (tipo) {
+    case "ativacao": case "ampliacao": case "reparo_fibra": case "configuracao_bgp":
+    case "conexao_ptt": case "colocation": case "protecao_ddos":
+      return `${meta.short} — ${dados.cliente_nome ?? "provedor"}${dados.circuito ? ` · ${dados.circuito}` : ""}`;
     case "transito":
       return `Trânsito ${dados.origem ?? "?"} → ${dados.destino ?? "?"}`;
     case "rfo":

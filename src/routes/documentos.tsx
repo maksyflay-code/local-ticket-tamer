@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -16,6 +17,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { listAssignableOperators } from "@/lib/operators.functions";
 
 export const Route = createFileRoute("/documentos")({
+  head: () => pageHead("Documentos", "Documentos técnicos e relatórios gerados pela IVI Telecom."),
   beforeLoad: requireAuth,
   component: DocumentosPage,
 });

@@ -1,3 +1,4 @@
+import { pageHead } from "@/lib/page-head";
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/AppShell";
@@ -12,6 +13,7 @@ import { authHeaders } from "@/lib/server-call";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 
 export const Route = createFileRoute("/relatorios")({
+  head: () => pageHead("Relatórios operacionais", "Relatórios de chamados e desempenho operacional da IVI Telecom."),
   beforeLoad: requireAuth,
   component: RelatoriosPage,
 });
